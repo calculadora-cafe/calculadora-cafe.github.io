@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Selector de café y ratio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: #EBEBEB;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #111;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .conjunto { width: 100%; max-width: 880px; }
+  .tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .tarjetas { grid-template-columns: 1fr; } }
+
+  .tarjeta { background: #fff; border-radius: 28px; padding: 28px; }
+
+  /* Fila superior: etiqueta + número, alineados por línea base */
+  .fila { display: flex; align-items: baseline; gap: 16px; margin-bottom: 14px; }
+  .etiqueta {
+    font-family: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-transform: uppercase; color: #8A8A8A; font-size: 13px; letter-spacing: .14em;
+  }
+  .valor {
+    display: flex; align-items: baseline;
+    font-size: 54px; font-weight: 300; color: #111; line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .prefijo { margin-right: .04em; }
+  .unidad { font-size: 22px; color: #8A8A8A; margin-left: 6px; font-weight: 400; }
+
+  /* Número rodante: columnas de dígitos. Se usa clip-path (no overflow)
+     para no alterar la línea base usada en la alineación. */
+  .rueda { display: flex; align-items: baseline; }
+  .col { display: block; width: 1ch; height: 1.1em; clip-path: inset(0); text-align: center; flex: none; }
+  .pila { display: block; will-change: transform; }
+  .d { display: block; height: 1.1em; line-height: 1.1; }
+  .dec {
+    display: block; width: 1ch; opacity: 1; clip-path: inset(0); flex: none;
+    transition: width .38s cubic-bezier(.3,.9,.3,1), opacity .26s ease;
+  }
+  .dec.oculto { width: 0; opacity: 0; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* Regla */
+  .regla { height: 72px; border-radius: 14px; touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; }
+  .regla.arrastrando { cursor: grabbing; }
+  .regla:focus { outline: none; }
+  .regla:focus-visible { outline: 2px solid #111; outline-offset: 3px; }
+  .regla canvas { display: block; width: 100%; height: 72px; touch-action: pan-y; }
+
+  .agua { margin: 18px 4px 0; font-size: 15px; color: #8A8A8A; font-variant-numeric: tabular-nums; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dec { transition-duration: .12s; }
+  }
+</style>
+</head>
+<body>
+<main class="conjunto">
+  <div class="tarjetas" id="tarjetas"></div>
+  <p class="agua" id="agua" aria-live="polite"></p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- Utilidades de movimiento ---------- */
+  const mqReducido = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const reducido = () => mqReducido.matches;
+  const acotar = (v, a, b) => Math.min(b, Math.max(a, v));
+
+  // Resorte amortiguado, integrador semi-implícito (Euler simétrico) con subpasos de 1/120 s.
+  // est = {x, v}; k = rigidez; c = amortiguación; masa = 1.
+  // Con prefers-reduced-motion se fuerza amortiguación crítica (c = 2·√k): sin rebote.
+  function pasoResorte(est, objetivo, k, c, dt) {
+    if (reducido()) c = 2 * Math.sqrt(k);
+    let resto = dt;
+    while (resto > 1e-6) {
+      const h = Math.min(resto, 1 / 120);
+      est.v += (-k * (est.x - objetivo) - c * est.v) * h; // primero velocidad…
+      est.x += est.v * h;                                  // …luego posición con la velocidad nueva
+      resto -= h;
+    }
+  }
+
+  /* ---------- Número rodante (columnas 0–9 apiladas) ---------- */
+  const ALTO_CELDA = 1.1; // en em; coincide con .d / .col en el CSS
+
+  function crearNumeroRodante(el, inicial) {
+    const K = 220, C = 22; // spring con leve overshoot (ζ ≈ 0.74)
+
+    function columna() {
+      const col = document.createElement('span'); col.className = 'col';
+      const pila = document.createElement('span'); pila.className = 'pila';
+      for (let i = 0; i < 10; i++) {
+        const d = document.createElement('span'); d.className = 'd'; d.textContent = i; pila.appendChild(d);
+      }
+      col.appendChild(pila);
+      return { col, pila, est: { x: 0, v: 0 }, obj: 0 };
+    }
+    const dec = columna(), uni = columna();
+    const envDec = document.createElement('span'); envDec.className = 'dec';
+    envDec.appendChild(dec.col);
+    el.append(envDec, uni.col);
+
+    const aplicar = c => { c.pila.style.transform = 'translate3d(0,' + (-c.est.x * ALTO_CELDA) + 'em,0)'; };
+
+    let raf = 0, ultimo = 0;
+    function cuadro(t) {
+      const dt = Math.max(0, Math.min((t - ultimo) / 1000, 1 / 30)); // dt acotado
+      ultimo = t;
+      let mueve = false;
+      [dec, uni].forEach(c => {
+        pasoResorte(c.est, c.obj, K, C, dt);
+        if (Math.abs(c.est.x - c.obj) > 5e-4 || Math.abs(c.est.v) > 5e-3) mueve = true;
+        else { c.est.x = c.obj; c.est.v = 0; }
+        aplicar(c);
+      });
+      raf = mueve ? requestAnimationFrame(cuadro) : 0;
+    }
+    function arrancar() {
+      if (!raf) { ultimo = performance.now(); raf = requestAnimationFrame(cuadro); }
+    }
+
+    function fijar(v, animar) {
+      v = Math.round(v);
+      uni.obj = v % 10;
+      if (v >= 10) {
+        dec.obj = Math.floor(v / 10);       // si baja de 10 se conserva el último dígito mientras se colapsa
+        envDec.classList.remove('oculto');
+      } else {
+        envDec.classList.add('oculto');
+      }
+      if (animar) arrancar();
+      else { dec.est.x = dec.obj; uni.est.x = uni.obj; aplicar(dec); aplicar(uni); }
+    }
+    fijar(inicial, false);
+    if (inicial < 10) envDec.style.transition = 'none', envDec.offsetWidth, envDec.style.transition = '';
+    return { set: v => fijar(v, true) };
+  }
+
+  /* ---------- Tarjeta con regla ---------- */
+  function crearTarjetaRegla({ contenedor, etiqueta, etiquetaAria, min, max, inicial, prefijo, unidad, onChange }) {
+    const SEP = 14;       // separación entre ticks (px)
+    const SIGMA = 3;      // ancho de la campana de escala (en ticks)
+    const ESCALA_MAX = 0.7; // el tick central llega a 1 + 0.7 = 1.7x
+    const K_SNAP = 170, C_SNAP = 24;
+    const UMBRAL_V = 2;   // unidades/s bajo las cuales termina la inercia
+
+    /* DOM */
+    const tarjeta = document.createElement('section');
+    tarjeta.className = 'tarjeta';
+    tarjeta.innerHTML =
+      '<div class="fila"><span class="etiqueta"></span>' +
+      '<div class="valor" aria-live="polite"><span class="sr"></span>' +
+      '<span class="num" aria-hidden="true" style="display:flex;align-items:baseline"></span></div></div>' +
+      '<div class="regla" tabindex="0" role="slider"><canvas></canvas></div>';
+    contenedor.appendChild(tarjeta);
+
+    tarjeta.querySelector('.etiqueta').textContent = etiqueta;
+    const sr = tarjeta.querySelector('.sr');
+    const num = tarjeta.querySelector('.num');
+    if (prefijo) { const p = document.createElement('span'); p.className = 'prefijo'; p.textContent = prefijo; num.appendChild(p); }
+    const rodante = document.createElement('span'); rodante.className = 'rueda'; num.appendChild(rodante);
+    if (unidad) { const u = document.createElement('span'); u.className = 'unidad'; u.textContent = unidad; num.appendChild(u); }
+
+    const regla = tarjeta.querySelector('.regla');
+    const canvas = regla.querySelector('canvas');
+    const ctx = canvas.getContext('2d');
+    regla.setAttribute('aria-label', etiquetaAria || etiqueta);
+    regla.setAttribute('aria-valuemin', min);
+    regla.setAttribute('aria-valuemax', max);
+
+    const numero = crearNumeroRodante(rodante, inicial);
+
+    /* Estado físico: pos es la posición VISUAL (en unidades) que se dibuja */
+    let pos = inicial, vel = 0;
+    let modo = 'reposo';          // reposo | arrastre | inercia | resorte
+    let objetivo = inicial;       // destino del resorte
+    const est = { x: 0, v: 0 };
+    let valor = null;
+    let ancho = 0, alto = 72, dpr = 1;
+    let raf = 0, ultimo = 0;
+
+    /* Rubber band al estilo iOS (en px, luego a unidades) */
+    const dim = () => Math.max(ancho, 1);
+    function elastico(excUnid) {          // exceso crudo -> exceso visual
+      const px = excUnid * SEP, d = dim();
+      return ((1 - 1 / (px * 0.55 / d + 1)) * d) / SEP;
+    }
+    function elasticoInv(visUnid) {       // exceso visual -> exceso crudo
+      const v = Math.min(visUnid * SEP, dim() * 0.999), d = dim();
+      return ((d / 0.55) * (1 / (1 - v / d) - 1)) / SEP;
+    }
+    const aVisual = r => r < min ? min - elastico(min - r) : r > max ? max + elastico(r - max) : r;
+    const aCrudo = p => p < min ? min - elasticoInv(min - p) : p > max ? max + elasticoInv(p - max) : p;
+
+    /* Valor mostrado = redondeo de la posición actual, acotado */
+    function actualizarValor() {
+      const v = acotar(Math.round(pos), min, max);
+      if (v === valor) return;
+      valor = v;
+      numero.set(v);
+      sr.textContent = (prefijo || '') + v + (unidad ? ' ' + unidad : '');
+      regla.setAttribute('aria-valuenow', v);
+      regla.setAttribute('aria-valuetext', (prefijo || '') + v + (unidad ? ' ' + unidad : ''));
+      if (onChange) onChange(v);
+    }
+
+    /* Dibujo de la regla */
+    function dibujar() {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, ancho, alto);
+      const cx = ancho / 2, cy = alto / 2;
+      const desde = Math.max(min, Math.ceil(pos - cx / SEP - 1));
+      const hasta = Math.min(max, Math.floor(pos + cx / SEP + 1));
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 1.5;
+      for (let i = desde; i <= hasta; i++) {            // solo ticks visibles y dentro del rango
+        const d = i - pos, x = cx + d * SEP;
+        const mayor = i % 5 === 0;
+        const g = Math.exp(-(d * d) / (2 * SIGMA * SIGMA));    // campana gaussiana
+        const h = (mayor ? 26 : 16) * (1 + ESCALA_MAX * g);
+        const e = (cx ? Math.min(1, Math.abs(x - cx) / cx) : 1);
+        ctx.globalAlpha = 0.08 + 0.92 * Math.pow(1 - e, 1.8);  // se desvanece hacia los bordes
+        ctx.strokeStyle = mayor ? '#8A8A8A' : '#C4C4C4';
+        ctx.beginPath(); ctx.moveTo(x, cy - h / 2); ctx.lineTo(x, cy + h / 2); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = '#111'; ctx.lineWidth = 3;      // indicador fijo al centro
+      ctx.beginPath(); ctx.moveTo(cx, cy - 32); ctx.lineTo(cx, cy + 32); ctx.stroke();
+    }
+
+    function ajustarTamano() {
+      dpr = window.devicePixelRatio || 1;
+      ancho = regla.clientWidth; alto = 72;
+      canvas.width = Math.round(ancho * dpr);
+      canvas.height = Math.round(alto * dpr);
+      dibujar();
+    }
+
+    /* Bucle de animación */
+    function iniciarResorte(obj) {
+      objetivo = acotar(obj, min, max);
+      est.x = pos; est.v = vel; modo = 'resorte';
+      despertar();
+    }
+    function cuadro(t) {
+      const dt = Math.max(0, Math.min((t - ultimo) / 1000, 1 / 30));
+      ultimo = t;
+      if (modo === 'inercia') {
+        vel *= Math.exp(-dt / (reducido() ? 0.12 : 0.35)); // fricción exponencial
+        pos += vel * dt;
+        if (pos < min || pos > max) iniciarResorte(pos < min ? min : max); // cruzó el límite
+        else if (Math.abs(vel) < UMBRAL_V) iniciarResorte(Math.round(pos)); // snap al entero
+      } else if (modo === 'resorte') {
+        pasoResorte(est, objetivo, K_SNAP, C_SNAP, dt);
+        pos = est.x; vel = est.v;
+        if (Math.abs(pos - objetivo) < 5e-4 && Math.abs(vel) < 0.01) { pos = objetivo; vel = 0; modo = 'reposo'; }
+      }
+      actualizarValor();
+      dibujar();
+      raf = (modo === 'reposo' || modo === 'arrastre') ? 0 : requestAnimationFrame(cuadro);
+    }
+    function despertar() {
+      if (!raf) { ultimo = performance.now(); raf = requestAnimationFrame(cuadro); }
+    }
+    function redibujar() { actualizarValor(); dibujar(); }
+
+    /* Arrastre con Pointer Events */
+    let idPuntero = null, xInicio = 0, crudoInicio = 0, muestras = [];
+    regla.addEventListener('pointerdown', e => {
+      if (idPuntero !== null) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      idPuntero = e.pointerId;
+      regla.setPointerCapture(idPuntero);
+      regla.classList.add('arrastrando');
+      modo = 'arrastre'; vel = 0;
+      xInicio = e.clientX; crudoInicio = aCrudo(pos);
+      muestras = [{ t: performance.now(), p: pos }];
+    });
+    regla.addEventListener('pointermove', e => {
+      if (e.pointerId !== idPuntero || modo !== 'arrastre') return;
+      // Arrastrar a la izquierda (dx < 0) aumenta el valor
+      pos = aVisual(crudoInicio - (e.clientX - xInicio) / SEP);
+      const t = performance.now();
+      muestras.push({ t, p: pos });
+      while (muestras.length > 2 && t - muestras[0].t > 120) muestras.shift();
+      redibujar();
+    });
+    function soltar(e) {
+      if (e.pointerId !== idPuntero) return;
+      idPuntero = null;
+      regla.classList.remove('arrastrando');
+      if (modo !== 'arrastre') return;
+      // Velocidad sobre las últimas ~80 ms de muestras
+      const ahora = performance.now();
+      const ref = muestras.find(m => ahora - m.t <= 80);
+      let v = 0;
+      if (ref && ahora - ref.t > 8) v = (pos - ref.p) / ((ahora - ref.t) / 1000);
+      vel = acotar(v, -80, 80);
+      if (pos < min || pos > max) iniciarResorte(pos < min ? min : max);
+      else if (Math.abs(vel) > UMBRAL_V * 2) { modo = 'inercia'; despertar(); }
+      else { vel = 0; iniciarResorte(Math.round(pos)); }
+    }
+    regla.addEventListener('pointerup', soltar);
+    regla.addEventListener('pointercancel', soltar);
+
+    /* Rueda del mouse: ±1 por evento con throttle de ~40 ms */
+    let ultimaRueda = 0;
+    regla.addEventListener('wheel', e => {
+      e.preventDefault();                    // solo se dispara con el puntero sobre la regla
+      const t = performance.now();
+      if (t - ultimaRueda < 40) return;
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (!delta) return;
+      ultimaRueda = t;
+      ir((modo === 'resorte' ? objetivo : Math.round(pos)) + Math.sign(delta));
+    }, { passive: false });
+
+    /* Teclado */
+    function ir(v) { if (modo === 'arrastre') return; iniciarResorte(Math.round(acotar(v, min, max))); }
+    regla.addEventListener('keydown', e => {
+      const base = modo === 'resorte' ? objetivo : Math.round(pos);
+      let nuevo = null;
+      switch (e.key) {
+        case 'ArrowLeft': case 'ArrowDown': nuevo = base - 1; break;
+        case 'ArrowRight': case 'ArrowUp': nuevo = base + 1; break;
+        case 'Home': nuevo = min; break;
+        case 'End': nuevo = max; break;
+      }
+      if (nuevo !== null) { e.preventDefault(); ir(nuevo); }
+    });
+
+    new ResizeObserver(ajustarTamano).observe(regla);
+    ajustarTamano();
+    actualizarValor();
+
+    return {
+      obtenerValor: () => valor,
+      establecer: v => ir(v)
+    };
+  }
+
+  /* ---------- Montaje de las dos tarjetas + línea de agua ---------- */
+  const contenedor = document.getElementById('tarjetas');
+  const lineaAgua = document.getElementById('agua');
+  let cafe = 15, ratio = 15;
+  function actualizarAgua() { lineaAgua.textContent = 'Agua: ' + (cafe * ratio) + ' ml'; }
+
+  crearTarjetaRegla({
+    contenedor, etiqueta: 'Café', etiquetaAria: 'Café en gramos',
+    min: 5, max: 40, inicial: 15, unidad: 'g',
+    onChange: v => { cafe = v; actualizarAgua(); }
+  });
+  crearTarjetaRegla({
+    contenedor, etiqueta: 'Ratio', etiquetaAria: 'Ratio',
+    min: 10, max: 20, inicial: 15, prefijo: '1:',
+    onChange: v => { ratio = v; actualizarAgua(); }
+  });
+  actualizarAgua();
+})();
+</script>
+</body>
+</html>
