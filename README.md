@@ -19,5 +19,3 @@ Abre `index.html` en el navegador. No necesita servidor ni dependencias.
 ## Fuentes
 
 SCA Coffee Standards, Hario (Tetsu Kasuya), Slow Pour Supply (Carlos Medina), Honest Coffee Guide (George Peng), Hario USA (James Hoffmann). Los valores son puntos de partida; el perfil de sabor es una estimación orientativa.
-
-Montaña Dept.
