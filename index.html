@@ -2,6 +2,8 @@
 <html lang="es-CL">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-+/I2GlDmAJPSo+E1OIQ71eHQc9aR2zwuTWR4gpj8scg='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Calculadora de café</title>
 <meta name="description" content="Calculadora de café filtrado: pon los gramos y te da agua, temperatura, vertidos y tiempos.">
@@ -161,6 +163,8 @@ select{width:100%;min-height:48px;background:var(--panel);border:1px solid var(-
 .foot{margin-top:28px;background:var(--panel);border-radius:28px;padding:24px;color:var(--muted)}
 .foot h2{font-size:16px;font-weight:500;color:var(--ink)}
 .foot ul{padding-left:20px;margin:8px 0 14px}.foot li{font-size:13px}
+.foot .firma{margin:14px 0 0;padding-top:14px;border-top:1px solid color-mix(in srgb,var(--muted) 25%,transparent)}
+.foot .firma a{color:var(--ink)}
 .ncoma{flex:none}
 .taza{margin-top:16px}
 .taza h2{margin-top:16px}
@@ -238,6 +242,7 @@ details.ap a{color:var(--ink)}
       <li><a href="https://www.hario-usa.com/blogs/recipes-and-more-from-friends/james-hoffmann-uitimate-v60-technique">Hario USA: técnica de James Hoffmann</a></li>
     </ul>
     <p class="sm muted">Valores de partida: ajusta molienda según el sabor (ácido/aguado → más fino; amargo/seco → más grueso). Rango SCA de temperatura: 90–96 °C.</p>
+    <p class="sm muted firma">Hecha por <a href="https://www.instagram.com/matisinho.__/" target="_blank" rel="noopener noreferrer">@matisinho.__</a> en Instagram.</p>
   </footer>
 </div>
 <script>
