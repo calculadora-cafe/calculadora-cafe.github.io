@@ -2,11 +2,11 @@
 <html lang="es-CL">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-+/I2GlDmAJPSo+E1OIQ71eHQc9aR2zwuTWR4gpj8scg='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-KdOg1VrX919214FV92egE7r3wkOqxNLeVpdNUzYQ1lM='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Calculadora de café</title>
-<meta name="description" content="Calculadora de café filtrado: pon los gramos y te da agua, temperatura, vertidos y tiempos.">
+<title>Calculadora de café: V60, AeroPress y prensa francesa</title>
+<meta name="description" content="Calculadora de café para V60, AeroPress y prensa francesa: pon los gramos y te da agua, temperatura, pasos y tiempos.">
 <meta name="theme-color" content="#140B08">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
@@ -14,7 +14,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://calculadora-cafe.github.io/">
 <meta property="og:title" content="Calculadora de café">
-<meta property="og:description" content="Pon los gramos de café y te da agua, temperatura, vertidos y tiempos.">
+<meta property="og:description" content="Pon los gramos de café y te da agua, temperatura, pasos y tiempos para V60, AeroPress y prensa francesa.">
 <meta property="og:image" content="https://calculadora-cafe.github.io/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -66,13 +66,17 @@ button{background:var(--card);border:0;box-shadow:inset 0 0 0 1px var(--line);bo
 button:disabled{opacity:.45;cursor:not-allowed}
 button.pri{background:var(--knob);color:#fff;box-shadow:none}
 header p{margin:8px 0 0}
-.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px 16px}
-.theme{display:inline-grid;grid-template-columns:repeat(2,auto);gap:4px;padding:4px;background:var(--pill);border-radius:999px}
-.theme button{padding-inline:16px;background:transparent;box-shadow:none;border-radius:999px}
-.theme button[aria-pressed=true]{background:var(--card);box-shadow:0 2px 10px rgba(0,0,0,.14)}
+.top{display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:flex-start;gap:12px 16px}
+.top>div{flex:1;min-width:0}
+.tbtn{flex:none;width:44px;height:44px;padding:0;display:grid;place-items:center;border-radius:999px;background:var(--pill);box-shadow:none}
+.tbtn svg{width:20px;height:20px;fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tbtn .sun,.tbtn[data-d=dark] .moon{display:none}.tbtn[data-d=dark] .sun{display:block}
 .tabs{margin:20px 0 16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;background:var(--pill);border-radius:999px}
-.tabs button{padding-inline:6px;background:transparent;box-shadow:none;border-radius:999px}
-.tabs button[aria-selected=true]{background:var(--card);box-shadow:0 2px 10px rgba(0,0,0,.14)}
+.tabs{position:relative;--tabs-dur:250ms;--tabs-ease:cubic-bezier(.22,1,.36,1)}
+.tabs button{position:relative;z-index:1;padding-inline:6px;background:transparent;box-shadow:none;border-radius:999px;color:var(--muted);transition:color var(--tabs-dur) var(--tabs-ease)}
+.tabs button:hover,.tabs button[aria-selected=true]{color:var(--ink)}
+.tabs-pill{position:absolute;top:4px;bottom:4px;left:0;width:0;background:var(--card);box-shadow:0 2px 10px rgba(0,0,0,.14);border-radius:999px;transform:translateX(0);transition:transform var(--tabs-dur) var(--tabs-ease),width var(--tabs-dur) var(--tabs-ease);will-change:transform,width;z-index:0;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.tabs-pill,.tabs button{transition:none!important}}
 .paper{background:var(--card);border-radius:28px;padding:20px 24px;margin-bottom:16px}
 .ctl>*+*{margin-top:16px}
 label,.lab{display:block;margin-bottom:6px}
@@ -135,6 +139,12 @@ select{width:100%;min-height:48px;background:var(--panel);border:1px solid var(-
 .pr{display:flex;flex-direction:column;align-items:flex-end;text-align:right;white-space:nowrap}
 .pg{font:300 clamp(28px,7vw,36px)/1 var(--sans);font-variant-numeric:tabular-nums}
 .tips{margin:14px 0 0;padding-left:20px}.tips li{margin:2px 0}
+.recos{margin-top:0}.recos li{margin:8px 0}
+.grindviz{display:flex;align-items:center;gap:10px;margin-top:6px;font:400 13px/1.35 var(--sans);color:var(--muted)}
+.grindviz svg{flex:none;width:50px;height:40px;fill:var(--ink);opacity:.85}
+.gv-t{display:flex;flex-direction:column;gap:4px}
+.gv-s{display:flex;align-items:center;gap:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em}.gv-s b{font-weight:400}
+.gv-d{display:flex;gap:4px}.gv-d i{width:6px;height:6px;border-radius:50%;background:var(--line)}.gv-d i.on{background:var(--ink);box-shadow:0 0 0 2px var(--datos),0 0 0 3px var(--ink)}
 .timer{background:var(--card);border-radius:28px;padding:24px}
 .timer.run{box-shadow:0 0 0 2px var(--lime)}
 .thead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
@@ -156,6 +166,11 @@ select{width:100%;min-height:48px;background:var(--panel);border:1px solid var(-
 .txtin{display:block;width:100%;margin-top:18px;min-height:56px;padding:8px 0;border:0;border-bottom:1px solid var(--edge);border-radius:0;background:transparent;font:300 clamp(24px,6vw,32px)/1.2 var(--sans)}
 .rec{display:inline-block;margin:14px 0 0;padding:4px 14px;border-radius:999px;font-size:13px;background:var(--pill)}
 .rec.ok{background:var(--lime);color:#161616}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.opt{min-height:44px;padding:6px 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-size:15px;cursor:pointer}
+.opt[aria-pressed=true]{background:var(--lime);color:#161616;border-color:transparent}
+.beans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}.opt.bean{border-radius:18px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}.bean .pair{display:flex;justify-content:center}.bean .pair svg{width:36px;height:64px;margin:8px -2px 14px}.opt.bean[aria-pressed=true] .muted{color:#161616}.bean svg{width:52px;height:72px;display:block;margin:0 auto 6px}.bean .bb{fill:light-dark(#8a5a36,#a8754c)}.bean .bc{fill:none;stroke:light-dark(#3b2414,#2a170b);stroke-width:4;stroke-linecap:round}.bean p{margin:2px 0}.bean b{font-weight:500}
+.gbox{margin:0 0 6px;padding:14px 16px;border-radius:18px;background:var(--panel)}.gbox .lbl{margin:0 0 6px}.gbox p{margin:6px 0 0}
 .nav{display:flex;gap:8px;margin-top:22px}
 .nav button{flex:1 1 0}
 .why{margin-top:22px}.why h2{font-size:18px;font-weight:500}.why ul{margin:8px 0 0;padding-left:20px}.why li{margin:6px 0}
@@ -189,6 +204,20 @@ details.ap summary::after{content:"+";margin-left:auto;font-size:22px;color:var(
 details.ap[open] summary::after{content:"−"}
 details.ap p{margin:0 0 18px;color:var(--muted)}
 details.ap a{color:var(--ink)}
+.mbar{display:flex;flex-wrap:wrap;align-items:center;gap:0 10px;margin:20px 0 0;color:var(--muted)}
+.mbar b{font-weight:500;color:var(--ink)}
+.mbar+.tabs{margin-top:6px}
+button.lnk{padding:0 6px;background:transparent;box-shadow:none;border-radius:8px;font-weight:400;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.msel{margin-top:28px}
+.mopts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+button.mopt{display:flex;flex-direction:column;align-items:flex-start;gap:6px;height:auto;padding:20px;border-radius:28px;text-align:left;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);font-weight:400}
+button.mopt:hover{box-shadow:inset 0 0 0 2px var(--ink)}
+.mopt svg{width:96px;height:96px;margin-bottom:6px;fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.mopt svg .lq{fill:var(--lime);stroke:none}
+.mopt svg .th{stroke:var(--line)}.mopt svg .nb{stroke-width:1.3}.mopt svg .dot{fill:var(--ink);stroke:none}.mopt svg .sc{stroke-width:7.5}.mopt svg .v6{stroke-width:5.4}
+.mopt .mn{font:400 24px/1.15 var(--sans)}
+.mopt .sm{margin:0}
+@media(max-width:480px){.mopts{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){.bar span{transition:none}.ndec{transition-duration:.12s}}
 @media(max-width:640px){
   .tarjetas,.cols{grid-template-columns:minmax(0,1fr)}
@@ -205,18 +234,17 @@ details.ap a{color:var(--ink)}
   <header class="top">
     <div>
       <a class="brand" href="./" aria-label="calculadora de café, inicio"><svg class="brand-mark" viewBox="-4 2 108 136" aria-hidden="true" fill="currentColor"><circle cx="49.8" cy="16.0" r="1.32"/><circle cx="45.2" cy="23.9" r="1.51"/><circle cx="54.4" cy="23.9" r="1.51"/><circle cx="40.6" cy="31.9" r="1.69"/><circle cx="49.8" cy="31.9" r="1.69"/><circle cx="59.0" cy="31.9" r="1.69"/><circle cx="36.0" cy="39.9" r="1.87"/><circle cx="45.2" cy="39.9" r="1.87"/><circle cx="54.4" cy="39.9" r="1.87"/><circle cx="63.6" cy="39.9" r="1.87"/><circle cx="31.4" cy="47.8" r="2.04"/><circle cx="40.6" cy="47.8" r="2.04"/><circle cx="49.8" cy="47.8" r="2.04"/><circle cx="59.0" cy="47.8" r="2.04"/><circle cx="68.2" cy="47.8" r="2.04"/><circle cx="26.8" cy="55.8" r="2.20"/><circle cx="36.0" cy="55.8" r="2.20"/><circle cx="45.2" cy="55.8" r="2.20"/><circle cx="54.4" cy="55.8" r="2.20"/><circle cx="63.6" cy="55.8" r="2.20"/><circle cx="72.8" cy="55.8" r="2.20"/><circle cx="22.2" cy="63.8" r="2.31"/><circle cx="31.4" cy="63.8" r="2.37"/><circle cx="40.6" cy="63.8" r="2.37"/><circle cx="49.8" cy="63.8" r="2.37"/><circle cx="59.0" cy="63.8" r="2.37"/><circle cx="68.2" cy="63.8" r="2.37"/><circle cx="77.4" cy="63.8" r="2.32"/><circle cx="17.6" cy="71.7" r="2.40"/><circle cx="26.8" cy="71.7" r="2.53"/><circle cx="36.0" cy="71.7" r="2.53"/><circle cx="45.2" cy="71.7" r="2.53"/><circle cx="54.4" cy="71.7" r="2.53"/><circle cx="63.6" cy="71.7" r="2.53"/><circle cx="72.8" cy="71.7" r="2.53"/><circle cx="82.0" cy="71.7" r="2.40"/><circle cx="22.2" cy="79.7" r="2.62"/><circle cx="31.4" cy="79.7" r="2.69"/><circle cx="40.6" cy="79.7" r="2.69"/><circle cx="49.8" cy="79.7" r="2.69"/><circle cx="59.0" cy="79.7" r="2.69"/><circle cx="68.2" cy="79.7" r="2.69"/><circle cx="77.4" cy="79.7" r="2.63"/><circle cx="86.6" cy="79.7" r="2.48"/><circle cx="17.6" cy="87.7" r="2.70"/><circle cx="26.8" cy="87.7" r="2.85"/><circle cx="36.0" cy="87.7" r="2.85"/><circle cx="45.2" cy="87.7" r="2.85"/><circle cx="54.4" cy="87.7" r="2.85"/><circle cx="63.6" cy="87.7" r="2.85"/><circle cx="72.8" cy="87.7" r="2.85"/><circle cx="82.0" cy="87.7" r="2.70"/><circle cx="13.0" cy="95.6" r="2.76"/><circle cx="22.2" cy="95.6" r="2.93"/><circle cx="31.4" cy="95.6" r="3.00"/><circle cx="40.6" cy="95.6" r="3.00"/><circle cx="49.8" cy="95.6" r="3.00"/><circle cx="59.0" cy="95.6" r="3.00"/><circle cx="68.2" cy="95.6" r="3.00"/><circle cx="77.4" cy="95.6" r="2.93"/><circle cx="86.6" cy="95.6" r="2.76"/><circle cx="17.6" cy="103.6" r="2.95"/><circle cx="26.8" cy="103.6" r="3.12"/><circle cx="36.0" cy="103.6" r="3.16"/><circle cx="45.2" cy="103.6" r="3.16"/><circle cx="54.4" cy="103.6" r="3.16"/><circle cx="63.6" cy="103.6" r="3.16"/><circle cx="72.8" cy="103.6" r="3.13"/><circle cx="82.0" cy="103.6" r="2.96"/><circle cx="22.2" cy="111.6" r="3.10"/><circle cx="31.4" cy="111.6" r="3.25"/><circle cx="40.6" cy="111.6" r="3.31"/><circle cx="49.8" cy="111.6" r="3.31"/><circle cx="59.0" cy="111.6" r="3.31"/><circle cx="68.2" cy="111.6" r="3.25"/><circle cx="77.4" cy="111.6" r="3.11"/><circle cx="26.8" cy="119.5" r="3.20"/><circle cx="36.0" cy="119.5" r="3.31"/><circle cx="45.2" cy="119.5" r="3.38"/><circle cx="54.4" cy="119.5" r="3.38"/><circle cx="63.6" cy="119.5" r="3.32"/><circle cx="72.8" cy="119.5" r="3.21"/><circle cx="40.6" cy="127.5" r="3.33"/><circle cx="49.8" cy="127.5" r="3.36"/><circle cx="59.0" cy="127.5" r="3.33"/></svg><span>calculadora de café</span></a>
-      <h1>Calculadora de café filtrado</h1>
-      <p class="muted">Elige los gramos de café y el ratio con las reglas y la calculadora hace el resto. 1 g de agua ≈ 1 ml.</p>
+      <h1>Calculadora de café</h1>
+      <p class="muted" id="intro">Elige los gramos de café y el ratio con las reglas y la calculadora hace el resto. 1 g de agua ≈ 1 ml.</p>
     </div>
-    <div class="theme" role="group" aria-label="Tema de color">
-      <button type="button" data-act="tema" data-v="light" aria-pressed="true">Claro</button>
-      <button type="button" data-act="tema" data-v="dark" aria-pressed="false">Oscuro</button>
-    </div>
+    <button type="button" class="tbtn" id="tbtn" data-act="tema" data-v="toggle" aria-label="Cambiar a modo oscuro"><svg class="moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg><svg class="sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5V5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg></button>
   </header>
+  <div class="mbar" id="mbar" hidden><span>Método: <b id="mname"></b></span><span aria-hidden="true">·</span><button type="button" class="lnk" data-act="metodo" data-v="">Cambiar</button></div>
   <div class="tabs" id="tabs" role="tablist" aria-label="Nivel de la calculadora">
-    <button type="button" role="tab" id="tab-simple" data-act="tab" data-v="simple" aria-controls="view" aria-selected="true">Simple</button>
+    <span class="tabs-pill" id="tpill2" aria-hidden="true"></span>
+    <button type="button" role="tab" id="tab-simple" data-act="tab" data-v="simple" aria-controls="view" aria-selected="true">Principiante</button>
     <button type="button" role="tab" id="tab-inter" data-act="tab" data-v="inter" aria-controls="view" aria-selected="false">Intermedio</button>
-    <button type="button" role="tab" id="tab-adv" data-act="tab" data-v="adv" aria-controls="view" aria-selected="false">Avanzado</button>
+    <button type="button" role="tab" id="tab-adv" data-act="tab" data-v="adv" aria-controls="view" aria-selected="false">Personalizada</button>
   </div>
   <div id="ctl"></div>
   <div class="tarjetas" id="tarjetas"></div>
@@ -240,6 +268,10 @@ details.ap a{color:var(--ink)}
       <li><a href="https://www.slowpoursupply.co/blogs/brew-recipes/recipe-recap-carlos-medina-s-representing-chile-world-brewers-cup-champion-recipe">Slow Pour Supply: receta de Carlos Medina</a></li>
       <li><a href="https://honestcoffeeguide.com/brew-recipes/george-jinyang-peng-2025-wbc/">Honest Coffee Guide: receta de George Jinyang Peng</a></li>
       <li><a href="https://www.hario-usa.com/blogs/recipes-and-more-from-friends/james-hoffmann-uitimate-v60-technique">Hario USA: técnica de James Hoffmann</a></li>
+      <li><a href="https://www.th3rdwave.coffee/recipe/UHJvZHVjdFJlY2lwZTpralRJR3RVemk=/">Th3rdwave: receta AeroPress de James Hoffmann</a></li>
+      <li><a href="https://worldaeropresschampionship.com/pages/1st-george-stanica-romania-2024">World AeroPress Championship: George Stanica 2024</a></li>
+      <li><a href="https://worldaeropresschampionship.com/pages/1st-nemo-pop-australia-2025">World AeroPress Championship: Némo Pop 2025</a></li>
+      <li><a href="https://honestcoffeeguide.com/brew-recipes/james-hoffmann-french-press/">Honest Coffee Guide: prensa francesa de James Hoffmann</a></li>
     </ul>
     <p class="sm muted">Valores de partida: ajusta molienda según el sabor (ácido/aguado → más fino; amargo/seco → más grueso). Rango SCA de temperatura: 90–96 °C.</p>
     <p class="sm muted firma">Hecha por <a href="https://www.instagram.com/matisinho.__/" target="_blank" rel="noopener noreferrer">@matisinho.__</a> en Instagram.</p>
@@ -306,11 +338,11 @@ function kw(t,L){const n=norm(t),m=L.find(r=>r[0].some(k=>n.includes(k)));return
 const optOf=i=>Q[i].parse(S.adv.a[i]||'')||{l:'',a:0};
 const Q=[
  {txt:true,q:'¿De qué país viene?',h:'Puedes escribir también la región o zona.',ph:'Ej: Colombia, Huila, Etiopía Guji…',parse:t=>{const m=kw(t,PAISES);return m&&(m.a?m:{l:m.l,a:0})}},
- {txt:true,q:'¿Qué café/grano estás usando?',h:'Escribe la variedad si la sabes; si no, déjalo vacío.',ph:'Ej: Geisha, Bourbon rosado, Heirloom, Castillo…',parse:t=>kw(t,VARS)},
+ {txt:true,q:'¿Qué café/grano estás usando?',h:'Elige de la lista o escribe la variedad. Si no sabes, déjalo vacío.',ph:'Ej: Geisha, Bourbon rosado, Heirloom, Castillo…',opts:['Geisha','Bourbon','Typica','Caturra','Catuaí','Castillo','Heirloom etíope','SL28','Pacamara','No sé'],parse:t=>kw(t,VARS)},
  {txt:true,q:'¿A qué altura se cosechó?',h:'A más altura, grano más denso y más difícil de extraer.',ph:'Ej: 1800, 1.700–1.900 msnm',parse:altura},
- {txt:true,q:'¿Qué proceso tiene?',h:'',pre:'Proceso',ph:'Ej: lavado, honey, natural, anaeróbico',parse:t=>rx(t,PROC)},
+ {txt:true,q:'¿Qué proceso tiene?',h:'Elige de la lista o escríbelo. Si no sabes, déjalo vacío.',pre:'Proceso',opts:['Lavado','Honey','Natural','Anaeróbico','No sé'],ph:'Ej: lavado, honey, natural, anaeróbico',parse:t=>rx(t,PROC)},
  {txt:true,q:'¿Qué tueste tiene?',h:'Vacío se toma como tueste medio.',pre:'Tueste',ph:'Ej: claro, medio-claro, medio, oscuro',parse:t=>rx(t,TUESTE)},
- {txt:true,q:'¿Qué tipo de café es?',h:'Arábica, robusta o mezcla. Vacío se toma como arábica.',ph:'Ej: arábica, robusta, mezcla',parse:t=>{
+ {txt:true,q:'¿Qué tipo de café es?',h:'Arábica, robusta o mezcla. Vacío se toma como arábica.',ph:'Ej: arábica, robusta, mezcla',viz:'<div class="beans" role="group" aria-label="Elige el tipo de grano"><button type="button" class="opt bean" data-act="opt" data-v="Arábica" aria-pressed="false"><svg viewBox="0 0 100 120" aria-hidden="true"><ellipse class="bb" cx="50" cy="60" rx="30" ry="46"/><path class="bc" d="M50 20 C38 45 62 75 50 100"/></svg><b>Arábica</b><span class="sm muted">Ovalado, surco en S</span></button><button type="button" class="opt bean" data-act="opt" data-v="Robusta" aria-pressed="false"><svg viewBox="0 0 100 120" aria-hidden="true"><ellipse class="bb" cx="50" cy="60" rx="32" ry="36"/><path class="bc" d="M50 30 L50 90"/></svg><b>Robusta</b><span class="sm muted">Redondo, surco recto</span></button><button type="button" class="opt bean" data-act="opt" data-v="Mezcla" aria-pressed="false"><span class="pair"><svg viewBox="0 0 100 120" aria-hidden="true"><ellipse class="bb" cx="50" cy="60" rx="30" ry="46"/><path class="bc" d="M50 20 C38 45 62 75 50 100"/></svg><svg viewBox="0 0 100 120" aria-hidden="true"><ellipse class="bb" cx="50" cy="60" rx="32" ry="36"/><path class="bc" d="M50 30 L50 90"/></svg></span><b>Mezcla</b><span class="sm muted">De los dos tipos</span></button></div><p class="sm muted">Otras pistas: la robusta es más barata, huele más a tostado o a goma y da más crema y amargor. Si el paquete dice "100% arábica" o "especialidad", es arábica.</p>',parse:t=>{
    const n=norm(t),ar=/arabica/.test(n),ro=/robusta|canephora|conilon/.test(n);
    if(ar&&ro||/mezcla|blend/.test(n))return{l:'Mezcla arábica + robusta',a:-1.5,k:'mix',w:'tiene una parte de robusta, más soluble y amarga'};
    if(ro)return{l:'Robusta',a:-3,k:'rob',w:'es muy soluble y amarga, pide agua bastante más fría'};
@@ -320,7 +352,11 @@ const SRC={
  kas:['entrevista a Tetsu Kasuya en Hario','https://hario.co.uk/blogs/hario-ambassadors/hario-v60-recipe-interview-with-hario-ambassador-tetsu-kasuya'],
  med:['resumen de la receta en Slow Pour Supply','https://www.slowpoursupply.co/blogs/brew-recipes/recipe-recap-carlos-medina-s-representing-chile-world-brewers-cup-champion-recipe'],
  pen:['receta de George Jinyang Peng en Honest Coffee Guide','https://honestcoffeeguide.com/brew-recipes/george-jinyang-peng-2025-wbc/'],
- hof:['técnica Ultimate V60 en Hario USA','https://www.hario-usa.com/blogs/recipes-and-more-from-friends/james-hoffmann-uitimate-v60-technique']
+ hof:['técnica Ultimate V60 en Hario USA','https://www.hario-usa.com/blogs/recipes-and-more-from-friends/james-hoffmann-uitimate-v60-technique'],
+ aehof:['receta de James Hoffmann en Th3rdwave','https://www.th3rdwave.coffee/recipe/UHJvZHVjdFJlY2lwZTpralRJR3RVemk=/'],
+ aesta:['receta oficial en la World AeroPress Championship','https://worldaeropresschampionship.com/pages/1st-george-stanica-romania-2024'],
+ aepop:['receta oficial en la World AeroPress Championship','https://worldaeropresschampionship.com/pages/1st-nemo-pop-australia-2025'],
+ phof:['receta de James Hoffmann en Honest Coffee Guide','https://honestcoffeeguide.com/brew-recipes/james-hoffmann-french-press/']
 };
 
 /* ---------- cálculo ---------- */
@@ -330,100 +366,181 @@ const names=n=>['Bloom',...Array.from({length:n},(_,i)=>'Vertido '+(i+1))];
 function split(c,agua,n){const b=bloomOf(c),rest=agua-b,s=Math.round(rest/n),a=[b];for(let i=0;i<n-1;i++)a.push(s);a.push(rest-s*(n-1));return a}
 function equal(agua,n){const s=Math.round(agua/n),a=[];for(let i=0;i<n-1;i++)a.push(s);a.push(agua-s*(n-1));return a}
 function steps(gs,ts,nm,nt,tp){let acc=0;return gs.map((g,i)=>{acc+=g;return{t:ts?ts[i]:null,g,acc,temp:tp?tp[i]:null,name:nm[i],note:nt&&nt[i]||''}})}
+// Paso libre: {t,name,g,note,act,acc,temp,pre}. act = acción sin agua (g=0). acc fija el "llegar a" si hace falta.
+function mk(l){let a=0;return l.map(q=>{const g=q.act?0:q.g;a=q.acc!=null?q.acc:a+g;return{t:q.t,g,acc:a,temp:q.temp!=null?q.temp:null,name:q.name,note:q.note||'',act:!!q.act,pre:!!q.pre}})}
+const aeSt=agua=>mk([{t:0,name:'Vierte todo el agua',g:agua,note:'Pon el émbolo 1 cm para que no gotee'},{t:120,name:'Gira suave',act:1},{t:150,name:'Presiona lento',act:1,note:'Unos 30 s; para cuando sise'}]);
+const prSt=agua=>mk([{t:0,name:'Vierte todo el agua',g:agua},{t:240,name:'Revuelve suave y saca la espuma',act:1},{t:270,name:'Presiona lento y sirve',act:1}]);
 const rt=r=>'1:'+fmt1(r);
 const RECIPES=[
- {id:'pers',name:'Personalizada',rec:()=>16,build(c,r){
+ {id:'pers',m:'v60',name:'Receta base V60',sub:'Bloom 2× y vertidos iguales, con tu ratio y tus gramos.',rec:()=>16,build(c,r){
    const agua=Math.round(c*r),n=mainN(agua,c),gs=split(c,agua,n);
    const ts=gs.map((_,i)=>i?45+30*(i-1):0),st=steps(gs,ts,names(n),['Espera 45 s']);
    return{agua,ratio:rt(r),temp:93,grind:'Media',steps:st,fin:st[st.length-1].t+75,tips:['Bloom con el doble de agua que de café; espera 45 s antes del primer vertido.']}}},
- {id:'kas',name:'Tetsu Kasuya · 4:6 · Campeón mundial 2016',rec:()=>15,build(c,r){
+ {id:'kas',m:'v60',name:'Tetsu Kasuya · 4:6 · Campeón mundial 2016',rec:()=>15,build(c,r){
    const agua=Math.round(c*r),p=Math.round(agua*.2),gs=[p,p,p,p,agua-4*p];
    const nt=['Dulzor y acidez · 20%','Dulzor y acidez · 20%','Cuerpo · 20%','Cuerpo · 20%','Cuerpo · 20%'];
    return{agua,ratio:rt(r),temp:92,grind:'Gruesa',steps:steps(gs,[0,45,90,130,160],names(5).slice(1),nt),fin:210,
      tips:['Sin bloom aparte: el primer vertido cumple ese rol.','Los 2 primeros vertidos (40%) definen dulzor y acidez; los 3 últimos (60%), el cuerpo.','Retira el dripper a los 3:30.'],src:SRC.kas}}},
- {id:'med',name:'Carlos Medina (Chile) · Campeón mundial 2023',rec:()=>16,build(c,r){
+ {id:'med',m:'v60',name:'Carlos Medina (Chile) · Campeón mundial 2023',rec:()=>16,build(c,r){
    const agua=Math.round(c*r);
    return{agua,ratio:rt(r),temp:91,grind:'Media',steps:steps(equal(agua,5),[0,35,70,105,140],names(5).slice(1),['Vertido circular']),fin:160,
      tips:['Vertido circular y unos 30 s de pausa entre cada uno.','Dripper Origami con filtro cónico.'],src:SRC.med}}},
- {id:'pen',name:'George Jinyang Peng · Campeón mundial 2025',rec:()=>14,build(c,r){
+ {id:'pen',m:'v60',name:'George Jinyang Peng · Campeón mundial 2025',rec:()=>14,build(c,r){
    const agua=Math.round(c*r),b=bloomOf(c),p2=Math.round((agua-b)/2),gs=[b,p2,agua-b-p2];
    return{agua,ratio:rt(r),temp:96,tempNote:'El último vertido va a 80 °C',grind:'Media-fina',steps:steps(gs,[0,30,70],['Bloom','Vertido 1','Vertido 2'],['2× el café'],[96,96,80]),fin:135,
      tips:['Tueste claro. Esta receta usa dos temperaturas: enfriar el final suaviza el amargor.','Sirve cuando el café baje a unos 65 °C.'],src:SRC.pen}}},
- {id:'hof',name:'James Hoffmann · Ultimate V60',rec:()=>1000/60,build(c,r){
+ {id:'hof',m:'v60',name:'James Hoffmann · Ultimate V60',rec:()=>1000/60,build(c,r){
    const agua=Math.round(c*r),b=bloomOf(c),a60=Math.round(agua*.6);
    return{agua,ratio:rt(r),temp:96,tempNote:'Lo más caliente posible en tuestes claros',grind:'Media-fina',
      steps:steps([b,a60-b,agua-a60],[0,45,75],['Bloom','Vertido 1','Vertido 2'],['Con un giro suave, espera 45 s','Hasta el 60% del total','Hasta el 100%; giro suave']),fin:210,
-     tips:['60 g de café por litro de agua.'],src:SRC.hof}}}
+     tips:['60 g de café por litro de agua.'],src:SRC.hof}}},
+ {id:'aebase',m:'aero',name:'Receta base AeroPress',sub:'Infusión de 2:30 y presión lenta, con tu ratio y tus gramos.',rec:()=>15,build(c,r){
+   const agua=Math.round(c*r);
+   return{agua,ratio:rt(r),temp:93,grind:'Media-fina',steps:aeSt(agua),fin:180,inf:150,tips:[]}}},
+ {id:'aehof',m:'aero',name:'James Hoffmann · Ultimate AeroPress',sub:'Receta de James Hoffmann, escalada a tus gramos.',rec:()=>200/11,build(c,r){
+   const agua=Math.round(c*r);
+   return{agua,ratio:rt(r),temp:99,tempNote:'Recién hervida',grind:'Media-fina',steps:aeSt(agua),fin:180,inf:150,
+     tips:['No hace falta enjuagar el filtro ni precalentar.','Gira, no revuelvas.'],src:SRC.aehof}}},
+ {id:'aesta',m:'aero',name:'George Stanica (Rumania) · Campeón mundial AeroPress 2024',sub:'Receta de campeonato, escalada a tus gramos.',rec:()=>150/18,build(c,r){
+   // Original con 18 g: 100 g de extracción a 96 °C y dilución hasta ~150 g en la taza (132 g con agua caliente, el resto a temperatura ambiente).
+   const agua=Math.round(c*r),ex=Math.round(agua*100/150),b=Math.round(ex/2),rinde=Math.round(ex*.78),hotT=Math.round(agua*132/150),hot=Math.max(0,hotT-rinde),amb=Math.max(0,agua-hotT);
+   return{agua,aguaSub:'En la taza · de la tetera usas ~'+(ex+hot+amb)+' g',ratio:rt(r),temp:96,tempNote:'Solo la extracción; la dilución va aparte',grind:'Media-gruesa',inf:95,fin:150,
+     steps:mk([{t:0,name:'Bloom',g:b,temp:96},{t:30,name:'Vierte',g:ex-b,temp:96},{t:35,name:'Revuelve 10 s',act:1},{t:80,name:'Pon la tapa con filtro y saca el aire',act:1},{t:95,name:'Da vuelta y presiona 30–40 s',act:1},
+       {t:130,name:'Diluye: agua caliente hasta '+hotT+' g en la taza',g:hot,acc:hotT,note:'Agua caliente de la tetera. Se mide en la taza: el café presionado rinde unos '+rinde+' g.'},
+       {t:140,name:'Diluye: agua a temperatura ambiente hasta '+agua+' g',g:amb,acc:agua,note:'Se mide en la taza.'}]),
+     tips:['Posición invertida: el émbolo abajo y la cámara hacia arriba.','Él usó agua de 85–90 ppm y un solo filtro.','El agua total es lo que pesa la taza al final: la tetera gasta algo más, porque el café retiene agua.'],src:SRC.aesta}}},
+ {id:'aepop',m:'aero',name:'Némo Pop (Australia) · Campeón mundial AeroPress 2025',sub:'Receta de campeonato, escalada a tus gramos.',rec:()=>170/18,build(c,r){
+   // Original con 18 g: 70 g de bypass a 50 °C en la jarra y 100 g de extracción a 84 °C.
+   const agua=Math.round(c*r),bp=Math.round(agua*70/170),ex=agua-bp;
+   return{agua,ratio:rt(r),temp:84,tempNote:'El bypass va a 50 °C',grind:'Media-fina',inf:50,fin:70,
+     steps:mk([{t:0,name:'Bypass en la jarra',g:bp,temp:50,pre:1,note:'Agua a 50 °C, va directo a la jarra'},{t:0,name:'Vierte',g:ex,temp:84,note:'Moja todo el café'},{t:25,name:'Revuelve',act:1,note:'Norte-sur, este-oeste'},{t:50,name:'Presiona suave',act:1,note:'Unos 20 s'}]),
+     tips:['Usó 2 filtros de papel y tamizó los finos.','Su clave fue el agua: 125 ppm.'],src:SRC.aepop}}},
+ {id:'pbase',m:'prensa',name:'Receta base prensa',sub:'Infusión de 4 min, con tu ratio y tus gramos.',rec:()=>15,build(c,r){
+   const agua=Math.round(c*r);
+   return{agua,ratio:rt(r),temp:94,grind:'Gruesa',steps:prSt(agua),fin:300,inf:240,tips:[]}}},
+ {id:'phof',m:'prensa',name:'James Hoffmann · Ultimate French Press',sub:'Receta de James Hoffmann, escalada a tus gramos.',rec:()=>500/30,build(c,r){
+   const agua=Math.round(c*r);
+   return{agua,ratio:rt(r),temp:99,tempNote:'Recién hervida',grind:'Media-gruesa',inf:540,fin:540,
+     steps:mk([{t:0,name:'Vierte todo el agua',g:agua,note:'Moja todo el café'},{t:240,name:'Rompe la costra',act:1,note:'Revuelve la capa de arriba'},{t:255,name:'Saca la espuma con dos cucharas',act:1},{t:540,name:'Pon el émbolo solo hasta la superficie y sirve despacio',act:1,note:'No presiones hasta el fondo'}]),
+     tips:['Si esperas 5–8 min más tras romper la costra, la taza queda más limpia.'],src:SRC.phof}}}
 ];
+const IG=['Media-fina','Media','Media-gruesa','Gruesa'],DRAIN={'Media-fina':90,'Media':75,'Media-gruesa':60,'Gruesa':50};
+const GTXM={
+ aero:{'Media-fina':'Extrae rápido y da cuerpo. Presionar cuesta un poco más.','Media':'Balanceada. Infusión algo más larga.','Media-gruesa':'Taza limpia y ligera. Necesita más tiempo de contacto.','Gruesa':'Extrae lento: alargamos bastante la infusión para que no quede aguada.'},
+ prensa:{'Media-fina':'Extrae muy rápido y pasa sedimento. Acortamos la infusión y alargamos el reposo.','Media':'Más intensidad, algo de sedimento. Infusión más corta.','Media-gruesa':'Buen balance entre cuerpo y limpieza.','Gruesa':'La clásica para prensa: taza limpia, extracción pareja.'}};
+const GTXT={'Media-fina':'El agua baja lento y extrae más. Da más cuerpo y dulzor; si te pasas, sale amargo o seco. Por eso alargamos las pausas entre vertidos.','Media':'Flujo equilibrado. Es el punto de partida más seguro para filtrados.','Media-gruesa':'El agua baja más rápido y extrae menos. Taza más limpia y ligera; si te quedas corto, sale ácida o aguada. Por eso acortamos las pausas.','Gruesa':'El agua pasa muy rápido. Taza muy limpia y liviana; fácil que quede ácida o aguada. Usamos más vertidos y pausas cortas para darle contacto.'};
 function advPlan(c,ov){
-  const o=S.adv.a.map((_,i)=>optOf(i)),d=o.reduce((s,x)=>s+x.a,0),has=(...k)=>o.some(x=>k.includes(x.k));
+  const M=S.method,o=S.adv.a.map((_,i)=>optOf(i)),d=o.reduce((s,x)=>s+x.a,0),has=(...k)=>o.some(x=>k.includes(x.k));
   const temp=clamp(Math.round(93+d),85,99);
-  const rp=[];let r=16;
+  const base=M==='v60'?16:15,lim=M==='aero'?[12,18]:M==='prensa'?[13,17.5]:[14.5,17.5];
+  const rp=[];let r=base;
   if(has('claro','mclaro')){r-=.5;rp.push('tueste claro o medio-claro: −0,5')}
   if(has('oscuro','moscuro')){r+=1;rp.push('tueste oscuro o medio-oscuro: +1')}
   if(has('rob')){r+=1;rp.push('robusta: +1')}
   if(has('mix')){r+=.5;rp.push('mezcla con robusta: +0,5')}
   if(has('ana')){r-=.5;rp.push('proceso anaeróbico: −0,5')}
-  const rrec=Math.round(clamp(r,14.5,17.5)*2)/2,cust=ov!==undefined&&Math.round(ov*10)!==Math.round(rrec*10),rf=cust?ov:rrec;
-  const agua=Math.round(c*rf),n=d>=2?4:d>=0?3:2,bd=d>=0?45:30,iv=d>=2?35:30,gs=split(c,agua,n);
-  const ts=gs.map((_,i)=>i?bd+iv*(i-1):0),cool=has('ana','nat')&&has('claro','mclaro');
-  const tp=cool?gs.map((_,i)=>i===gs.length-1?temp-8:temp):null;
-  const grind=d>=2?'Media-fina':d>=-1.5?'Media':'Media-gruesa';
-  const st=steps(gs,ts,names(n),['Espera '+bd+' s'],tp);
+  const rrec=Math.round(clamp(r,lim[0],lim[1])*2)/2,cust=ov!==undefined&&Math.round(ov*10)!==Math.round(rrec*10),rf=cust?ov:rrec;
+  const g60=d>=2?'Media-fina':d>=-1.5?'Media':'Media-gruesa';
+  const gRec=M==='aero'?IG[Math.max(0,IG.indexOf(g60)-1)]:M==='prensa'?(d>=2?'Media-gruesa':'Gruesa'):g60;
+  const gsel=S.advGrindBy[M],g=IG.includes(gsel)?gsel:gRec,k=IG.indexOf(g)-IG.indexOf(gRec);
+  const agua=Math.round(c*rf),grind=g,GT=M==='v60'?GTXT:GTXM[M];
+  let st,fin,inf=null,tp=null,cool=false,resumen='';const diffs=[];
+  if(M==='v60'){
+    const nRec=d>=2?4:d>=0?3:2,ivRec=d>=2?35:30,bd=d>=0?45:30;
+    const n=clamp(nRec+(k>=2?1:k<=-1?-1:0),2,5),iv=clamp(ivRec-5*k,20,45),gs=split(c,agua,n);
+    const ts=gs.map((_,i)=>i?bd+iv*(i-1):0);cool=has('ana','nat')&&has('claro','mclaro');
+    tp=cool?gs.map((_,i)=>i===gs.length-1?temp-8:temp):null;
+    st=steps(gs,ts,names(n),['Espera '+bd+' s'],tp);fin=st[st.length-1].t+DRAIN[g];
+    resumen='Con este ajuste usamos '+n+' vertidos después del bloom, molienda '+grind.toLowerCase()+', bloom de '+bd+' s y '+iv+' s entre vertidos.';
+    if(iv!==ivRec)diffs.push('Pausas de '+iv+' s en vez de '+ivRec+' s');
+    if(n!==nRec)diffs.push(n+' vertidos en vez de '+nRec);
+  }else if(M==='aero'){
+    const T0=clamp(120+(d>=2?15:d<0?-15:0),60,210),T=clamp(T0+20*k,60,210);
+    st=mk([{t:0,name:'Vierte todo el agua',g:agua,note:'Pon el émbolo 1 cm para que no gotee'},{t:10,name:'Revuelve 3 veces',act:1},{t:T,name:'Gira suave',act:1},{t:T+30,name:'Presiona lento',act:1,note:'Unos 30 s; para cuando sise'}]);
+    fin=T+60;inf=T+30;
+    resumen='Con este ajuste usamos molienda '+grind.toLowerCase()+', infusión de '+mmss(inf)+' y presión lenta de unos 30 s.';
+    if(T!==T0)diffs.push('Infusión de '+mmss(inf)+' en vez de '+mmss(T0+30));
+  }else{
+    const T0=clamp(240+(d>=2?30:d<0?-30:0),180,360),T=clamp(T0+30*k,180,360);
+    const R=240+(IG.indexOf(g)<2?60:0),R0=240+(IG.indexOf(gRec)<2?60:0);
+    st=mk([{t:0,name:'Vierte todo el agua',g:agua,note:'Moja todo el café'},{t:T,name:'Rompe la costra',act:1,note:'Revuelve la capa de arriba'},{t:T+15,name:'Saca la espuma',act:1},{t:T+15+R,name:'Pon el émbolo hasta la superficie y sirve',act:1,note:'No presiones hasta el fondo'}]);
+    fin=T+15+R;inf=T;
+    resumen='Con este ajuste usamos molienda '+grind.toLowerCase()+', costra a los '+mmss(T)+' y reposo de '+mmss(R)+' antes de servir.';
+    if(T!==T0)diffs.push('Infusión de '+mmss(T)+' en vez de '+mmss(T0));
+    if(R!==R0)diffs.push('reposo de '+mmss(R)+' en vez de '+mmss(R0));
+  }
   const why=[];
   o.forEach((x,i)=>{if(x.a)why.push((Q[i].pre?Q[i].pre+' '+x.l.toLowerCase():x.l)+' (escribiste «'+esc(S.adv.a[i])+'»)'+': '+sg(x.a)+' °C, '+x.w+'.')});
   why.push('Suma de ajustes: '+(d?sg(d):'0')+' °C sobre la base de 93 °C, redondeado a '+temp+' °C.');
-  why.push(cust?'Proporción '+rt(rf)+' elegida por ti (la recomendada era '+rt(rrec)+').':'Proporción '+rt(rrec)+(rp.length?' (base 1:16; '+rp.join('; ')+').':' (la base, sin ajustes).'));
-  why.push('Con este ajuste usamos '+n+' vertidos después del bloom, molienda '+grind.toLowerCase()+', bloom de '+bd+' s y '+iv+' s entre vertidos.');
+  why.push(cust?'Proporción '+rt(rf)+' elegida por ti (la recomendada era '+rt(rrec)+').':'Proporción '+rt(rrec)+(rp.length?' (base 1:'+base+'; '+rp.join('; ')+').':' (la base, sin ajustes).'));
+  why.push(resumen);
+  let gtxt=GT[g],gx='';
+  if(k){const dt=diffs.join(', ');gx='Recomendada para tu café: '+gRec.toLowerCase()+'.'+(dt?' '+dt.replace(/^./,c=>c.toUpperCase())+'.':'');gtxt+=' '+gx}
+  why.push('Molienda '+(k?'elegida por ti':'recomendada')+': '+grind.toLowerCase()+'. '+GT[g]+(gx?' '+gx:''));
   if(cool)why.push('Último vertido a '+(temp-8)+' °C: con proceso natural o anaeróbico y tueste claro, enfriar el final reduce notas fermentadas y amargor. Es la misma idea de la receta de Peng 2025.');
-  return{agua,ratio:rt(rf),rec:rrec,r:rf,custom:cust,temp,tempNote:cool?'El último vertido va a '+(temp-8)+' °C':'',grind,steps:st,fin:st[st.length-1].t+75,tips:[],why}
+  return{agua,ratio:rt(rf),rec:rrec,r:rf,custom:cust,temp,tempNote:cool?'El último vertido va a '+(temp-8)+' °C':'',grind,steps:st,fin,inf,tips:[],why,gRec,gtxt}
 }
 
 /* ---------- estado ---------- */
-const S={cafe:15,tab:'simple',recipe:'pers',rx:{},adv:{a:['','','','','',''],step:0,done:false}};
-function save(){try{localStorage.setItem(KEY,JSON.stringify({cafe:S.cafe,tab:S.tab,recipe:S.recipe,rx:S.rx,a:S.adv.a,done:S.adv.done}))}catch(e){}}
+const MET=['v60','aero','prensa'],MN={v60:'V60',aero:'AeroPress',prensa:'Prensa francesa'},RMIN=8,rmin=()=>S.method==='aero'?8:10;
+const S={cafe:15,tab:'simple',method:null,recipeBy:{v60:'pers',aero:'aebase',prensa:'pbase'},rx:{},advGrindBy:{v60:'auto',aero:'auto',prensa:'auto'},adv:{a:['','','','','',''],step:0,done:false}};
+function save(){try{localStorage.setItem(KEY,JSON.stringify({cafe:S.cafe,tab:S.tab,method:S.method,recipeBy:S.recipeBy,rx:S.rx,a:S.adv.a,done:S.adv.done,agb:S.advGrindBy}))}catch(e){}}
 function load(){try{
   const j=JSON.parse(localStorage.getItem(KEY));if(!j||typeof j!=='object')return;
   if(typeof j.cafe==='number'&&isFinite(j.cafe))S.cafe=clamp(d1(j.cafe),5,40);
   if(['simple','inter','adv'].includes(j.tab))S.tab=j.tab;
+  if(MET.includes(j.method))S.method=j.method;
   const rcp=j.recipe==='tuya'?'pers':j.recipe;
-  if(RECIPES.some(r=>r.id===rcp))S.recipe=rcp;
-  if(j.rx&&typeof j.rx==='object')Object.keys(j.rx).forEach(k0=>{const v=j.rx[k0],k=k0==='inter:tuya'?'inter:pers':k0;if(/^(inter:(pers|kas|med|pen|hof)|adv)$/.test(k)&&typeof v==='number'&&isFinite(v))S.rx[k]=clamp(d1(v),10,20)});
+  if(RECIPES.some(r=>r.id===rcp&&r.m==='v60'))S.recipeBy.v60=rcp;
+  if(j.recipeBy&&typeof j.recipeBy==='object')MET.forEach(m=>{const v=j.recipeBy[m];if(RECIPES.some(r=>r.id===v&&r.m===m))S.recipeBy[m]=v});
+  if(j.rx&&typeof j.rx==='object')Object.keys(j.rx).forEach(k0=>{const v=j.rx[k0],k=k0==='inter:tuya'?'inter:pers':k0==='adv'?'adv:v60':k0;if(/^(inter:(pers|kas|med|pen|hof|aebase|aehof|aesta|aepop|pbase|phof)|adv:(v60|aero|prensa))$/.test(k)&&typeof v==='number'&&isFinite(v))S.rx[k]=clamp(d1(v),RMIN,20)});
   if(Array.isArray(j.a)&&j.a.length===6)S.adv.a=j.a.map(v=>typeof v==='string'?v.slice(0,80):'');
   S.adv.done=j.done===true;
+  if(j.ag==='auto'||IG.includes(j.ag))S.advGrindBy.v60=j.ag;
+  if(j.agb&&typeof j.agb==='object')MET.forEach(m=>{const v=j.agb[m];if(v==='auto'||IG.includes(v))S.advGrindBy[m]=v});
 }catch(e){}}
 
 /* ---------- vistas ---------- */
 let cur=null,heroNum=null,cafeCard=null,ratioCard=null;
 function cell(k,v,ex,sub){return '<div class="cell"><p class="mono">'+k+'</p><div class="val"><span>'+v+'</span>'+(ex||'')+'</div>'+(sub?'<p class="sm muted">'+sub+'</p>':'')+'</div>'}
 function pours(p){
-  const T=p.steps[0].t!==null;
-  return '<ul class="pours">'+p.steps.map(s=>'<li class="pour"><div class="pl">'+(T?'<span class="mono">'+mmss(s.t)+'</span>':'')+'<span class="nm">'+s.name+'</span><span class="pill">Ahora</span>'+(s.note?'<small>'+s.note+'</small>':'')+'</div><div class="pr"><span class="pg">'+s.g+' g</span><span class="sm muted">llegar a '+s.acc+' g'+(s.temp!==null?' · '+s.temp+' °C':'')+'</span></div></li>').join('')+'</ul><p class="sm muted">Llegar a: lo que marca la balanza, sin tarar entre vertidos.</p>';
+  const T=p.steps[0].t!==null,hay=p.steps.some(s=>!s.act);
+  return '<ul class="pours">'+p.steps.map(s=>'<li class="pour"><div class="pl">'+(T?'<span class="mono">'+mmss(s.t)+'</span>':'')+'<span class="nm">'+s.name+'</span><span class="pill">Ahora</span>'+(s.note?'<small>'+s.note+'</small>':'')+'</div>'+(s.act?'':'<div class="pr"><span class="pg">'+s.g+' g</span><span class="sm muted">llegar a '+s.acc+' g'+(s.temp!==null?' · '+s.temp+' °C':'')+'</span></div>')+'</li>').join('')+'</ul>'+(hay?'<p class="sm muted">Llegar a: lo que marca la balanza, sin tarar entre '+(S.method==='v60'?'vertidos':'pasos')+'.</p>':'');
 }
-const rkey=()=>S.tab==='inter'?'inter:'+S.recipe:'adv';
+const curRid=()=>S.recipeBy[S.method];
+const rkey=()=>S.tab==='inter'?'inter:'+curRid():'adv:'+S.method;
+const GRIND={'Media-fina':['como azúcar granulada',0],'Media':['como sal de mesa',1],'Media-gruesa':['como azúcar rubia gruesa',2],'Gruesa':['como sal de mar gruesa',3]};
+function grindViz(g){
+  const m=GRIND[g];if(!m)return '';
+  const rad=[2.2,3,3.9,5][m[1]],pts=[[8,9],[20,7],[32,10],[14,19],[27,20],[40,18],[9,29],[22,31],[35,30]];
+  const dots=pts.slice(0,m[1]>=3?6:m[1]>=2?7:9).map((q,i)=>{const k=rad*(0.85+((i*37)%5)/16);return '<ellipse cx="'+(q[0]*1.1).toFixed(1)+'" cy="'+q[1]+'" rx="'+k.toFixed(1)+'" ry="'+(k*(0.8+(i%3)*0.1)).toFixed(1)+'" transform="rotate('+(i*40)+' '+(q[0]*1.1).toFixed(1)+' '+q[1]+')"/>'}).join('');
+  const sc=[0,1,2,3].map(i=>'<i'+(i===m[1]?' class="on"':'')+'></i>').join('');
+  return '<span class="grindviz"><svg viewBox="0 0 50 40" width="50" height="40" aria-hidden="true" focusable="false">'+dots+'</svg><span class="gv-t"><span class="gv-s" aria-hidden="true"><b>Fina</b><span class="gv-d">'+sc+'</span><b>Gruesa</b></span>Ej.: '+m[0].replace('como ','')+'</span></span>';
+}
 function parts(p,title,sub){
   const n=p.steps.length;
-  const cells=[cell('Café',fmt1(p.cafe)+' g'),cell('Agua',p.agua+' g',null,p.agua+' ml')];
+  const cells=[cell('Café',fmt1(p.cafe)+' g'),cell('Agua',p.agua+' g',null,p.aguaSub||p.agua+' ml')];
   if(p.temp)cells.push(cell('Temperatura',p.temp+' °C','<span class="gauge" aria-hidden="true"><i style="top:'+((1-(clamp(p.temp,85,99)-85)/14)*100).toFixed(1)+'%"></i></span>'));
   cells.push(cell('Ratio',p.ratio));
-  if(p.grind)cells.push(cell('Molienda',p.grind));
-  cells.push(cell('Vertidos',String(n),null,p.hasBloom?'bloom + '+(n-1):''));
+  if(p.grind)cells.push(cell('Molienda',p.grind,null,grindViz(p.grind)));
+  if(S.method==='v60')cells.push(cell('Vertidos',String(n),null,p.hasBloom?'bloom + '+(n-1):''));
+  else if(p.inf!=null)cells.push(cell('Infusión',mmss(p.inf)));
   const side=[];
   if(p.temp)side.push('<div><p class="mono">Temperatura</p><p class="big m">'+p.temp+'<span class="u"> °C</span></p>'+(p.tempNote?'<p class="sm">'+p.tempNote+'</p>':'')+'</div>');
   if(p.fin!=null)side.push('<div><p class="mono">Tiempo total</p><p class="big m">'+mmss(p.fin)+'</p></div>');
   if(!side.length)side.push('<div><p class="mono">Café</p><p class="big m">'+fmt1(p.cafe)+'<span class="u"> g</span></p></div>','<div><p class="mono">Ratio</p><p class="big m">'+p.ratio+'</p></div>');
   const timer=p.fin!=null?'<div class="timer" id="timer"><div class="thead"><p class="mono">Temporizador</p><p class="tpill" id="tpill"></p></div><div class="trow"><p class="clock" id="clock">0:00</p><p class="clock pc" id="tpct">0%</p></div><div class="bar" id="tbarw" role="progressbar" aria-label="Avance de la receta" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="tbar"></span></div><div class="say"><p class="now" id="now"></p><p class="sm muted" id="nxt"></p></div><div class="btns"><button type="button" class="pri" id="tgo" data-act="tgo">Iniciar</button><button type="button" data-act="trs">Reiniciar</button></div></div>':'';
   return{hero:{title,sub,agua:p.agua,side:side.join('')},data:cells.join(''),
-    detail:timer+'<p class="mono lbl">Vertidos</p>'+pours(p)+(p.tips.length?'<ul class="tips">'+p.tips.map(t=>'<li>'+t+'</li>').join('')+'</ul>':'')+
+    detail:timer+(p.gtxt?'<div class="gbox"><p class="mono lbl">Tu molienda</p><p class="sm">'+p.gtxt+'</p></div>':'')+'<p class="mono lbl">'+(S.method==='v60'?'Vertidos':'Pasos')+'</p>'+pours(p)+(p.recos?'<p class="mono lbl">Recomendaciones</p><ul class="tips recos">'+p.recos.map(t=>'<li>'+t+'</li>').join('')+'</ul>':'')+(p.tips.length?'<ul class="tips">'+p.tips.map(t=>'<li>'+t+'</li>').join('')+'</ul>':'')+
       (p.src?'<p class="sm muted" style="margin-top:12px">Fuente: <a href="'+p.src[1]+'">'+p.src[0]+'</a>.</p>':''),
     taza:tazaHTML(p),
     why:p.why?'<div class="why"><h2>Por qué estos números</h2><ul>'+p.why.map(w=>'<li>'+w+'</li>').join('')+'</ul></div>':''};
 }
 /* ---------- qué esperar en la taza ---------- */
-// Contexto con los parámetros que usa el modelo. Sin origen (Simple/Intermedio) esos campos quedan vacíos.
+// Contexto con los parámetros que usa el modelo. Sin origen (Principiante/Intermedio) esos campos quedan vacíos.
 function ctxOf(p){
-  const x={rid:S.tab==='inter'?S.recipe:S.tab,r:p.r,temp:p.temp,grind:p.grind||'',gap:0,pais:'',vari:'',h:0,proc:'',tue:'',esp:''};
-  if(p.steps[0].t!==null&&p.steps.length>1){x.gap=Infinity;for(let i=1;i<p.steps.length;i++)x.gap=Math.min(x.gap,p.steps[i].t-p.steps[i-1].t)}
+  const x={m:S.method,rid:S.tab==='inter'?curRid():S.tab,r:p.r,temp:p.temp,grind:p.grind||'',gap:0,pais:'',vari:'',h:0,proc:'',tue:'',esp:''};
+  if(S.method==='v60'&&p.steps[0].t!==null&&p.steps.length>1){x.gap=Infinity;for(let i=1;i<p.steps.length;i++)x.gap=Math.min(x.gap,p.steps[i].t-p.steps[i-1].t)}
   if(S.tab==='adv'){
     const o=[0,1,2,3,4,5].map(optOf);
     x.pais=o[0].l;x.vari=o[1].l;x.h=o[2].h||0;
@@ -456,6 +573,7 @@ function calcPerfil(x){
   if(x.pais==='Brasil'||x.pais==='Indonesia'||x.esp==='rob')cue+=15;
   if(osc||mos)cue+=10;
   if(/gruesa/i.test(x.grind))cue-=5;
+  if(x.m==='prensa')cue+=15;else if(x.m==='aero')cue+=8;
   let aci=50;
   if(cla)aci+=20;if(mcl)aci+=12;if(osc)aci-=25;if(mos)aci-=12;
   if(x.proc==='lav')aci+=8;
@@ -512,13 +630,16 @@ function notas(p,P){
   return l;
 }
 function moverHTML(p,P){
-  const x=p.ctx,L=[];
-  L.push({sc:100-P.dul,t:'Más dulzor',x:'Baja la temperatura 1–2 °C o alarga las pausas entre vertidos a 40 s.'});
-  L.push({sc:100-P.aci,t:'Más acidez y brillo',x:x.rid==='kas'?'Con el 4:6, haz el primer vertido más grande que el segundo.':'Prueba el 4:6 de Kasuya: con el primer vertido más grande que el segundo gana acidez.',act:x.rid==='kas'?null:['receta:kas','Probar']});
-  L.push({sc:100-P.cue,t:'Más cuerpo',x:'Sube a 1:15 o muele un punto más fino.',act:p.r>15.05?['ratio:15','Probar']:null});
+  const x=p.ctx,L=[],v6=x.m==='v60';
+  L.push({sc:100-P.dul,t:'Más dulzor',x:v6?'Baja la temperatura 1–2 °C o alarga las pausas entre vertidos a 40 s.':'Baja la temperatura 1–2 °C o acorta la infusión unos 15 s.'});
+  if(v6)L.push({sc:100-P.aci,t:'Más acidez y brillo',x:x.rid==='kas'?'Con el 4:6, haz el primer vertido más grande que el segundo.':'Prueba el 4:6 de Kasuya: con el primer vertido más grande que el segundo gana acidez.',act:x.rid==='kas'?null:['receta:kas','Probar']});
+  else L.push({sc:100-P.aci,t:'Más acidez y brillo',x:'Muele un poco más grueso o acorta la infusión.'});
+  if(v6)L.push({sc:100-P.cue,t:'Más cuerpo',x:'Sube a 1:15 o muele un punto más fino.',act:p.r>15.05?['ratio:15','Probar']:null});
+  else L.push({sc:100-P.cue,t:'Más cuerpo',x:'Baja el ratio 1 punto (más café) o alarga la infusión.',act:p.r-1>=rmin()?['ratio:-1','Probar']:null});
   L.push({sc:P.ama>=35?P.ama*1.5:10,t:'Menos amargor',x:'Baja la temperatura 2–3 °C o muele más grueso.'});
-  if(x.rid!=='pen')L.push({sc:x.tue==='oscuro'||x.tue==='moscuro'?15:45,t:'Más claridad floral',x:'Enfría el último vertido a unos 80 °C, como en la receta de Peng 2025.',act:['receta:pen','Probar']});
-  L.push({sc:100-P.int,t:'Más intensidad sin amargor',x:'Baja el ratio, no la molienda.',act:p.r-1>=10?['ratio:-1','Probar']:null});
+  if(v6){if(x.rid!=='pen')L.push({sc:x.tue==='oscuro'||x.tue==='moscuro'?15:45,t:'Más claridad floral',x:'Enfría el último vertido a unos 80 °C, como en la receta de Peng 2025.',act:['receta:pen','Probar']})}
+  else L.push({sc:x.tue==='oscuro'||x.tue==='moscuro'?15:45,t:'Más claridad',x:x.m==='aero'?'Usa dos filtros de papel y muele un poco más grueso.':'Sirve despacio y deja el último poco en la jarra.'});
+  L.push({sc:100-P.int,t:'Más intensidad sin amargor',x:'Baja el ratio, no la molienda.',act:p.r-1>=rmin()?['ratio:-1','Probar']:null});
   L.sort((a,b)=>b.sc-a.sc);
   return L.slice(0,4).map(m=>'<div class="mcard"><p class="mono">Si quieres</p><h3>'+m.t+'</h3><p class="sm muted">'+m.x+'</p>'+(m.act?'<button type="button" data-act="probar" data-v="'+m.act[0]+'">'+m.act[1]+'</button>':'<p class="sm muted">Ajuste manual.</p>')+'</div>').join('');
 }
@@ -526,11 +647,20 @@ const APORTA={
   kas:'Dulzor y acidez ajustables con el 4:6, molienda gruesa y 5 vertidos.',
   med:'Taza redonda e integrada, con vertido circular y pausas de unos 30 s.',
   pen:'Claridad floral con dos temperaturas: el último vertido va a 80 °C.',
-  hof:'Técnica simple y repetible, con 60 g de café por litro.'
+  hof:'Técnica simple y repetible, con 60 g de café por litro.',
+  aebase:'Simple y rápida: 2:30 de infusión y presión lenta.',
+  aehof:'Taza limpia con agua recién hervida: 11 g de café por 200 g de agua.',
+  aesta:'AeroPress invertida con dilución al final para una taza concentrada y redonda.',
+  aepop:'Extracción corta a 84 °C más agua a 50 °C directo a la jarra.',
+  pbase:'La clásica: 4 minutos de infusión y presión suave.',
+  phof:'Costra rota a los 4 min y reposo largo para una taza más limpia.'
 };
 function recetasHTML(p){
   const rid=p.ctx.rid,mapa={pers:['kas','pen'],kas:['pen','hof','med'],med:['kas','pen'],pen:['kas','hof'],hof:['pen','kas'],adv:['kas','pen','med']};
-  return (mapa[rid]||['kas','pen']).map(id=>{const r=RECIPES.find(z=>z.id===id);
+  const m=S.method;
+  mapa.adv=m==='aero'?['aehof','aesta','aepop']:m==='prensa'?['phof','pbase']:['kas','pen','med'];
+  Object.assign(mapa,{aebase:['aehof','aesta','aepop'],aehof:['aesta','aepop'],aesta:['aepop','aehof'],aepop:['aesta','aehof'],pbase:['phof'],phof:['pbase']});
+  return (mapa[rid]||['kas','pen']).filter(id=>RECIPES.some(z=>z.id===id&&z.m===m)).map(id=>{const r=RECIPES.find(z=>z.id===id);
     return '<div class="mcard"><p class="mono">Para explorar</p><h3>'+r.name+'</h3><p class="sm muted">'+APORTA[id]+'</p><button type="button" data-act="probar" data-v="receta:'+id+'">Usar esta receta</button></div>'}).join('');
 }
 function tazaHTML(p){
@@ -546,40 +676,81 @@ function tazaHTML(p){
   }
   return h;
 }
-const APRENDE=[
+const APRENDE_V60_BLOOM=[
  ['Bloom','Verter el doble de agua que de café y esperar entre 30 y 45 s deja escapar el CO₂ del tueste. Así el agua entra pareja entre las partículas y la extracción es más uniforme.'],
+];
+const APRENDE=[
  ['Molienda','Si la taza sale ácida o aguada, muele más fino; si sale amarga o seca, muele más grueso. Cambia una sola variable a la vez para saber qué hizo cada ajuste.'],
  ['Temperatura','El rango SCA es de 90 a 96 °C (<a href="https://sca.coffee/s/Coffee-Standards-1.pdf">estándares SCA</a>). Los tuestes claros y los granos densos de altura piden agua más caliente; los oscuros, más tibia para no amargar.'],
  ['Agua','Usa agua blanda y filtrada, sin sabor. Carlos Medina preparó con agua de unos 65 ppm, con calcio y magnesio en partes iguales (<a href="https://www.slowpoursupply.co/blogs/brew-recipes/recipe-recap-carlos-medina-s-representing-chile-world-brewers-cup-champion-recipe">receta</a>). Evita el agua destilada pura y la muy dura.'],
  ['Frescura','El café filtrado suele lucir mejor entre unos 7 y 30 días después del tueste. Muele justo antes de preparar: el café molido pierde aroma muy rápido.'],
  ['Enfriar la taza','El dulzor y las notas aparecen al bajar de unos 65 °C, como sirvió George Jinyang Peng su café campeón (<a href="https://honestcoffeeguide.com/brew-recipes/george-jinyang-peng-2025-wbc/">receta</a>). Espera un poco antes de decidir si te gusta.'],
- ['Los campeones','Tetsu Kasuya (2016) con su método 4:6 (<a href="https://hario.co.uk/blogs/hario-ambassadors/hario-v60-recipe-interview-with-hario-ambassador-tetsu-kasuya">entrevista</a>), Carlos Medina (Chile, 2023), Wölfl (2024) con filtro Orea y extracción rápida, y Peng (2025) con dos temperaturas. En Intermedio puedes probar varias de estas recetas.']
 ];
-const aprendeHTML='<p class="mono lbl">Aprende</p>'+APRENDE.map((a,i)=>'<details class="ap"'+(i===0?' open':'')+'><summary>'+a[0]+'</summary><p>'+a[1]+'</p></details>').join('');
+const APR_CAMP={
+ v60:['Los campeones','Tetsu Kasuya (2016) con su método 4:6 (<a href="https://hario.co.uk/blogs/hario-ambassadors/hario-v60-recipe-interview-with-hario-ambassador-tetsu-kasuya">entrevista</a>), Carlos Medina (Chile, 2023), Wölfl (2024) con filtro Orea y extracción rápida, y Peng (2025) con dos temperaturas. En Intermedio puedes probar varias de estas recetas.'],
+ aero:['Los campeones','George Stanica (Rumania, 2024) usó la AeroPress invertida y diluyó al final (<a href="https://worldaeropresschampionship.com/pages/1st-george-stanica-romania-2024">receta</a>). Némo Pop (Australia, 2025) mezcló una extracción corta a 84 °C con bypass a 50 °C (<a href="https://worldaeropresschampionship.com/pages/1st-nemo-pop-australia-2025">receta</a>). La World AeroPress Championship tiene participantes de más de 60 países. En Intermedio puedes probar sus recetas.'],
+ prensa:['Sedimento','La prensa usa filtro de metal: pasa aceites y partículas finas. Por eso tiene más cuerpo. Sirve despacio y deja el último poco en la jarra.']
+};
+function aprendeHTML(){
+  const L=[...(S.method==='v60'?APRENDE_V60_BLOOM:[]),...APRENDE,APR_CAMP[S.method]];
+  return '<p class="mono lbl">Aprende</p>'+L.map((a,i)=>'<details class="ap"'+(i===0?' open':'')+'><summary>'+a[0]+'</summary><p>'+a[1]+'</p></details>').join('');
+}
 
 function wizard(){
   const i=S.adv.step,q=Q[i];
   return '<div class="card wiz"><p class="mono">Pregunta '+(i+1)+' de 6</p><div class="dots" role="progressbar" aria-label="Progreso" aria-valuemin="1" aria-valuemax="6" aria-valuenow="'+(i+1)+'">'+[0,1,2,3,4,5].map(k=>'<i class="d'+(k<i?' on':k===i?' cur':'')+'"></i>').join('')+'</div>'+
   '<h2 tabindex="-1">'+q.q+'</h2>'+(q.h?'<p class="sm muted">'+q.h+'</p>':'')+
-  '<input id="txt" class="txtin" type="text" maxlength="80" autocomplete="off" placeholder="'+q.ph+'" aria-label="'+q.q+'" aria-describedby="rec"><p class="rec" id="rec" aria-live="polite"></p>'+
+  '<input id="txt" class="txtin" type="text" maxlength="80" autocomplete="off" placeholder="'+q.ph+'" aria-label="'+q.q+'" aria-describedby="rec">'+(q.opts?'<div class="opts" role="group" aria-label="Opciones">'+q.opts.map(o=>'<button type="button" class="opt" data-act="opt" data-v="'+o+'" aria-pressed="false">'+o+'</button>').join('')+'</div>':'')+(q.viz||'')+'<p class="rec" id="rec" aria-live="polite"></p>'+
   '<div class="nav"><button type="button" data-act="back"'+(i?'':' disabled')+'>Atrás</button><button type="button" class="pri" id="nextq" data-act="next">'+(i===5?'Ver resultado':'Siguiente')+'</button></div></div>';
 }
+const BASIC={
+ aero:{grind:'Media-fina',fin:180,inf:150,st:aeSt,recos:[
+  '<strong>Arma la AeroPress.</strong> Filtro de papel en la tapa, tapa en la cámara y todo sobre una taza firme.',
+  '<strong>Agua.</strong> Hierve y deja reposar 30 s si no tienes termómetro.',
+  '<strong>Émbolo puesto.</strong> Ponlo 1 cm apenas viertas: hace vacío y no gotea antes de tiempo.',
+  '<strong>Gira, no revuelvas.</strong> Un giro suave asienta el café antes de presionar.',
+  '<strong>Presiona lento.</strong> Unos 30 s. Si cuesta mucho, la molienda está muy fina.',
+  '<strong>Para en el siseo.</strong> Cuando suene el aire, deja de presionar: lo último sale amargo.',
+  '<strong>Ajusta.</strong> Ácido o aguado: muele más fino. Amargo: más grueso.']},
+ prensa:{grind:'Gruesa',fin:300,inf:240,st:prSt,recos:[
+  '<strong>Muele grueso.</strong> Si muele fino, pasa barro a la taza y queda amarga.',
+  '<strong>Precalienta.</strong> Enjuaga la prensa con agua caliente y bótala.',
+  '<strong>Moja todo el café.</strong> Vierte toda el agua de una y revisa que no queden grumos secos.',
+  '<strong>La costra.</strong> A los 4 min el café flota arriba: revuélvelo para que baje y saca la espuma.',
+  '<strong>Presiona suave.</strong> Si presionas fuerte, levantas sedimento.',
+  '<strong>Sirve todo.</strong> Si el café se queda en la prensa, se sigue extrayendo y se amarga.',
+  '<strong>Ajusta.</strong> Aguado: más café o más tiempo. Amargo: muele más grueso o acorta.']}
+};
 function plan(){
-  const c=S.cafe;let p,title,sub='';
-  if(S.tab==='simple'){
+  const c=S.cafe,M=S.method;let p,title,sub='';
+  if(!M)return null;
+  if(S.tab==='simple'&&M!=='v60'){
+    const B=BASIC[M],agua=Math.round(c*15);
+    p={agua,ratio:'1:15',r:15,temp:null,grind:B.grind,steps:B.st(agua),fin:B.fin,inf:B.inf,tips:[],recos:B.recos};title='Receta para principiantes';sub='Proporción fija 1:15.';
+  }else if(S.tab==='simple'){
     const agua=Math.round(c*16),n=mainN(agua,c),st=steps(split(c,agua,n),null,names(n),['Espera y deja gotear']);
-    p={agua,ratio:'1:16',r:16,temp:null,steps:st,fin:null,tips:['Sin tiempos: espera a que baje el agua antes de cada vertido.']};title='Receta simple';sub='Proporción fija 1:16.';
+    p={agua,ratio:'1:16',r:16,temp:null,grind:'Media',steps:st,fin:null,tips:['Sin tiempos: espera a que baje el agua antes de cada vertido.'],recos:[
+      '<strong>Humedece el filtro.</strong> Pasa agua caliente por el filtro antes de poner el café: quita el sabor a papel y entibia el dripper. Bota esa agua antes de empezar.',
+      '<strong>Bloom (primer vertido).</strong> El café recién tostado tiene CO₂; al mojarlo con poca agua (el doble del peso del café) burbujea e infla. Esperar unos 30–45 s deja salir ese gas para que después el agua extraiga parejo. Sin bloom, el gas repele el agua y la taza sale más plana o ácida.',
+      '<strong>Muele justo antes de preparar.</strong> El café molido pierde aroma rápido.',
+      '<strong>Vierte en círculos lentos.</strong> Parte desde el centro hacia afuera, sin pegarle directo al papel.',
+      '<strong>Agua recién hervida.</strong> Si no tienes termómetro, déjala reposar unos 30 s: queda cerca de 93 °C.',
+      '<strong>Pesa todo.</strong> Usa balanza en gramos; 1 g de agua = 1 ml.',
+      '<strong>Ajusta de a una cosa.</strong> Si sale ácido o aguado, muele más fino; si sale amargo, más grueso. Cambia una variable a la vez.']};title='Receta para principiantes';sub='Proporción fija 1:16.';
   }else if(S.tab==='inter'){
-    const rc=RECIPES.find(x=>x.id===S.recipe),rec=rc.rec(),ov=S.rx[rkey()],cust=ov!==undefined&&Math.round(ov*10)!==Math.round(rec*10),r=cust?ov:rec;
+    const rc=RECIPES.find(x=>x.id===curRid()),rec=rc.rec(),ov=S.rx[rkey()],cust=ov!==undefined&&Math.round(ov*10)!==Math.round(rec*10),r=cust?ov:rec;
     p=rc.build(c,r);p.rec=rec;p.r=r;p.custom=cust;p.tune=true;title=rc.name;
-    sub=rc.id==='pers'?'Bloom 2× y vertidos iguales, con tu ratio y tus gramos.':'Receta de campeonato, escalada a tus gramos.';
+    sub=rc.sub||'Receta de campeonato, escalada a tus gramos.';
   }else{
-    if(!S.adv.done)return null;p=advPlan(c,S.rx.adv);p.tune=true;title='Receta a tu medida';sub='Calculada con las respuestas que diste.';
+    if(!S.adv.done)return null;p=advPlan(c,S.rx[rkey()]);p.tune=true;title='Receta a tu medida';sub='Calculada con las respuestas que diste.';
   }
+  if(M==='aero'&&p.agua>250)p.tips=[...p.tips,'Tu AeroPress aguanta unos 250 ml: baja el café o prepara en dos tandas.'];
   p.cafe=c;p.hasBloom=p.steps[0].name==='Bloom';p.ctx=ctxOf(p);p.perfil=calcPerfil(p.ctx);p.q=parts(p,title,sub);return p;
 }
 function controls(){
-  if(S.tab==='inter')return '<div class="paper ctl"><label for="recipe">Receta</label><select id="recipe">'+RECIPES.map(r=>'<option value="'+r.id+'"'+(r.id===S.recipe?' selected':'')+'>'+r.name+'</option>').join('')+'</select></div>';
+  if(S.tab==='inter')return '<div class="paper ctl"><label for="recipe">Receta</label><select id="recipe">'+RECIPES.filter(r=>r.m===S.method).map(r=>'<option value="'+r.id+'"'+(r.id===curRid()?' selected':'')+'>'+r.name+'</option>').join('')+'</select></div>';
+  if(S.tab==='adv'&&S.adv.done){const gr=advPlan(S.cafe,S.rx[rkey()]).gRec,gsel=S.advGrindBy[S.method];
+    return '<div class="paper ctl"><label for="grind">Molienda</label><select id="grind"><option value="auto"'+(gsel==='auto'?' selected':'')+'>Recomendada ('+gr+')</option>'+IG.map(g=>'<option value="'+g+'"'+(gsel===g?' selected':'')+'>'+g+' · '+GRIND[g][0].replace('como ','')+'</option>').join('')+'</select></div>'}
   return '';
 }
 
@@ -588,23 +759,25 @@ const T={on:false,t0:0,base:0,id:0};
 const el=()=>T.base+(T.on?performance.now()-T.t0:0);
 function tstop(){clearInterval(T.id);T.on=false}
 function treset(){tstop();T.base=0}
+const tpTxt=x=>x.temp!==null?' a '+x.temp+' °C':'';
+const stTxt=x=>x.act?x.name+(x.note?'. '+x.note:''):S.method==='v60'?'vierte '+x.g+' g hasta llegar a '+x.acc+' g'+tpTxt(x):x.name+' ('+x.g+' g, hasta '+x.acc+' g'+tpTxt(x)+')';
 function tick(){
   const P=cur;if(!P||P.fin==null||!$('#clock'))return;
   let ms=el();if(ms>=P.fin*1000){ms=P.fin*1000;if(T.on){tstop();T.base=ms}}
   const s=Math.floor(ms/1000),started=T.on||ms>0,done=s>=P.fin;
   let i=0;P.steps.forEach((x,k)=>{if(s>=x.t)i=k});
-  const x=P.steps[i],nx=P.steps[i+1];
+  const x=P.steps[i],nx=P.steps[i+1],last=P.steps[P.steps.length-1],atEnd=done&&last.t>=P.fin;
   $('#clock').textContent=mmss(s);
-  document.querySelectorAll('#view .pour').forEach((r,k)=>r.classList.toggle('on',started&&!done&&k===i));
+  document.querySelectorAll('#view .pour').forEach((r,k)=>r.classList.toggle('on',started&&(!done||atEnd)&&k===i));
   const pc=Math.round(ms/(P.fin*1000)*100);$('#tpct').textContent=pc+'%';$('#tbar').style.width=pc+'%';$('#tbarw').setAttribute('aria-valuenow',pc);
   $('#timer').classList.toggle('run',T.on);
-  $('#tpill').textContent=done?'Listo':'Vierte '+(started?x:P.steps[0]).g+' g';
+  const cs=started?x:P.steps[0];
+  $('#tpill').textContent=done?(atEnd?'Último paso':'Listo'):cs.act?cs.name:'Vierte '+cs.g+' g';
   $('#tgo').textContent=T.on?'Pausar':'Iniciar';
-  const tp=x.temp!==null?' a '+x.temp+' °C':'';
   let now,nxt='';
-  if(done){now='Listo: tu café está preparado.'}
-  else if(!started){const f=P.steps[0];now='Primer paso: vierte '+f.g+' g hasta llegar a '+f.acc+' g'+(f.temp!==null?' a '+f.temp+' °C':'')+'.'}
-  else{now='Ahora: vierte '+x.g+' g hasta llegar a '+x.acc+' g'+tp+'.';
+  if(done){now=atEnd?'Ahora: '+stTxt(last)+'.':'Listo: tu café está preparado.'}
+  else if(!started){const f=P.steps[0];now='Primer paso: '+stTxt(f)+'.';if(f.pre&&P.steps[1])nxt='Al iniciar: '+stTxt(P.steps[1])+'.'}
+  else{now='Ahora: '+stTxt(x)+'.';
     nxt=(T.on?'':'En pausa. ')+(nx?'Siguiente en '+(nx.t-s)+' s.':'Fin estimado en '+(P.fin-s)+' s.')}
   if($('#now').textContent!==now)$('#now').textContent=now;
   $('#nxt').textContent=nxt;
@@ -616,14 +789,15 @@ function tgo(){
   T.t0=performance.now();T.on=true;T.id=setInterval(tick,200);tick();
 }
 
+function markOpts(){const v=norm(($('#txt')||{}).value||'').trim();document.querySelectorAll('.opt').forEach(b=>b.setAttribute('aria-pressed',String(!!v&&norm(b.dataset.v)===v)))}
 function recog(){
-  const q=Q[S.adv.step],v=($('#txt')||{}).value||'',r=q.parse(v),e=$('#rec');if(!e)return;
+  const q=Q[S.adv.step],v=($('#txt')||{}).value||'',r=q.parse(v),e=$('#rec');if(!e)return;markOpts();
   e.className='rec'+(r&&v.trim()?' ok':'');
   e.textContent=!v.trim()?'Campo vacío: lo tomo como neutro (sin ajuste).':r?'Reconocido: '+r.l+(r.n?' ('+r.n+')':''):'No lo reconozco: lo tomo como neutro (sin ajuste).';
 }
 function nextQ(){
   if(S.adv.step===5){S.adv.done=true;render('#view')}
-  else{S.adv.step++;render('.wiz h2')}
+  else{S.adv.step++;transWiz(1,'.wiz h2')}
 }
 function fillHero(h,saltar){
   $('#h-title').textContent=h.title;$('#h-sub').textContent=h.sub||'';$('#h-side').innerHTML=h.side;
@@ -632,26 +806,75 @@ function fillHero(h,saltar){
 }
 function syncCards(){
   const show=!!(cur&&cur.tune),estabaVisible=ratioCard.visible();
-  ratioCard.setVisible(show);
+  ratioCard.setMin(rmin());ratioCard.setVisible(show);
   if(show){ratioCard.setValor(cur.custom?cur.r:cur.rec,estabaVisible);ratioCard.setExtras(cur.custom,rt(cur.rec))}
+}
+const INTRO='Elige los gramos de café y el ratio con las reglas y la calculadora hace el resto. 1 g de agua ≈ 1 ml.';
+const MINFO=[
+ ['v60','V60','Filtrado por goteo. Taza limpia, resalta acidez y notas.','Molienda media · 2:30–4 min','<svg viewBox="0 0 96 96" aria-hidden="true" focusable="false"><g class="sc v6" transform="translate(-5.8 -48.6) scale(.28)"><g transform="translate(0 0)"><path class="lq" d="M70 418H274L271 440Q267 470 238 470H105Q73 470 71 440Z"/><path d="M40 318H278"/><path d="M46 318Q62 322 64 336L42 440Q36 490 85 490H258Q306 490 300 440L278 336V318"/><path d="M278 332H312Q345 332 345 365V380Q345 415 305 435"/></g><path d="M70 200H275L185 364H160Z"/><path d="M122 200L166 362M172 200V362M224 200L180 362"/></g></svg>'],
+ ['aero','AeroPress','Inmersión y presión. Cuerpo medio, rápido y versátil.','Molienda media-fina · 1–3 min','<svg viewBox="0 0 96 96" aria-hidden="true" focusable="false"><g class="sc" transform="translate(-100.5 -15.8) scale(.22)"><g transform="translate(495 0)"><path class="lq" d="M70 418H274L271 440Q267 470 238 470H105Q73 470 71 440Z"/><path d="M40 318H278"/><path d="M46 318Q62 322 64 336L42 440Q36 490 85 490H258Q306 490 300 440L278 336V318"/><path d="M278 332H312Q345 332 345 365V380Q345 415 305 435"/></g><rect x="575" y="93" width="175" height="17" rx="8.5"/><path d="M605 110V318M718 110V318"/><rect x="588" y="125" width="147" height="193"/></g></svg>'],
+ ['prensa','Prensa francesa','Inmersión total. Mucho cuerpo y textura.','Molienda gruesa · 4–9 min','<svg viewBox="0 0 96 96" aria-hidden="true" focusable="false"><path class="lq" d="M26 58H62V80Q62 84 58 84H30Q26 84 26 80Z"/><circle cx="44" cy="9" r="4"/><path d="M44 13V32"/><path d="M22 32H66"/><rect x="24" y="36" width="40" height="50" rx="6"/><path class="th" d="M26 56H62"/><path d="M64 44H72Q80 44 80 54V68Q80 78 72 78H64"/></svg>']
+];
+function selHTML(){
+  return '<section class="msel" aria-labelledby="msel-t"><h2 id="msel-t" tabindex="-1">¿Con qué vas a preparar?</h2><div class="mopts">'+MINFO.map(m=>'<button type="button" class="mopt" data-act="metodo" data-v="'+m[0]+'">'+m[4]+'<span class="mn">'+m[1]+'</span><span class="sm">'+m[2]+'</span><span class="sm muted">'+m[3]+'</span></button>').join('')+'</div></section>';
 }
 function render(focus){
   treset();
-  cur=plan();
+  const sel=!S.method;
+  cur=sel?null:plan();
   document.querySelectorAll('[role=tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.v===S.tab)));
+  pillTabs();
   $('#view').setAttribute('aria-labelledby','tab-'+S.tab);
-  $('#ctl').innerHTML=controls();
+  $('#tabs').hidden=sel;$('#mbar').hidden=sel;$('#tarjetas').hidden=sel;
+  $('#mname').textContent=sel?'':MN[S.method];
+  $('#intro').textContent=sel?'Elige cómo vas a preparar y la calculadora te arma la receta. 1 g de agua ≈ 1 ml.':INTRO;
+  $('#ctl').innerHTML=sel?'':controls();
   const hero=$('#hero'),antes=hero.hidden;hero.hidden=!cur;
   let h='';
-  if(!cur)h=wizard();
+  if(sel)h=selHTML();
+  else if(!cur)h=wizard();
   else h=(S.tab==='adv'?'<button type="button" class="edit" data-act="edit">Editar respuestas</button>':'')+
-    '<div class="cols"><section class="gcard" aria-label="Datos"><p class="mono">Datos</p><div class="data" id="c-data">'+cur.q.data+'</div></section><div class="colR" id="c-detail">'+cur.q.detail+'</div></div><div id="c-why">'+cur.q.why+'</div><section class="taza" aria-label="Qué esperar en la taza"><div id="c-taza">'+cur.q.taza+'</div><div id="c-aprende">'+aprendeHTML+'</div></section>';
+    '<div class="cols"><section class="gcard" aria-label="Datos"><p class="mono">Datos</p><div class="data" id="c-data">'+cur.q.data+'</div></section><div class="colR" id="c-detail">'+cur.q.detail+'</div></div><div id="c-why">'+cur.q.why+'</div><section class="taza" aria-label="Qué esperar en la taza"><div id="c-taza">'+cur.q.taza+'</div><div id="c-aprende">'+aprendeHTML()+'</div></section>';
   $('#view').innerHTML=h;
   if(cur){fillHero(cur.q.hero,antes);tick()}
   syncCards();
   if($('#txt')){$('#txt').value=S.adv.a[S.adv.step]||'';recog()}
   if(focus){const f=$(focus);if(f)f.focus()}
   save();
+}
+/* transición entre preguntas del wizard: altura animada + contenido que entra deslizando */
+let wizAnims=[];
+function transWiz(dir,focus){
+  const viejo=document.querySelector('.wiz');
+  if(mqReducido.matches||!viejo||!viejo.animate){render(focus);return}
+  const h0=viejo.offsetHeight;
+  wizAnims.forEach(a=>{try{a.cancel()}catch(e){}});wizAnims=[];
+  render(focus);
+  const card=document.querySelector('.wiz');if(!card)return;
+  try{
+    const h1=card.offsetHeight;
+    if(Math.abs(h1-h0)>1)wizAnims.push(card.animate([{height:h0+'px'},{height:h1+'px'}],{duration:750,easing:'cubic-bezier(.22,1,.36,1)'}));
+    const dx=40*dir;
+    [...card.children].filter(c=>!c.matches('.mono:first-child,.dots,.nav')).forEach((c,k)=>{
+      wizAnims.push(c.animate([{transform:'translateX('+dx+'px)',opacity:0,filter:'blur(4px)'},{transform:'translateX(0)',opacity:1,filter:'blur(0)'}],{duration:850,delay:Math.min(k,6)*120,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'}));
+    });
+    const dot=card.querySelector('.d.cur');
+    if(dot)wizAnims.push(dot.animate([{transform:'scaleX(.4)'},{transform:'scaleX(1)'}],{duration:250,easing:'cubic-bezier(.2,.8,.2,1)'}));
+  }catch(e){}
+}
+let viewAnims=[];
+function transView(dir,focus,ex){ex=ex||0;
+  const v=document.getElementById('view');
+  if(mqReducido.matches||!v||!v.animate||!v.offsetHeight){render(focus);return}
+  viewAnims.forEach(a=>{try{a.cancel()}catch(e){}});viewAnims=[];
+  const h0=v.offsetHeight;
+  render(focus);
+  try{
+    const h1=v.offsetHeight,E='cubic-bezier(.22,1,.36,1)';
+    if(Math.abs(h1-h0)>1){v.style.overflow='hidden';const an=v.animate([{height:h0+'px'},{height:h1+'px'}],{duration:750+ex,easing:E});an.finished.then(()=>{v.style.overflow=''},()=>{v.style.overflow=''});viewAnims.push(an)}
+    const hero=document.getElementById('hero'),els=[...document.getElementById('ctl').children,...[...document.getElementById('tarjetas').children].filter(c=>c.offsetHeight),...(hero.hidden?[]:[hero]),...v.children];
+    els.forEach((c,i)=>viewAnims.push(c.animate([{transform:'translateX('+(40*dir)+'px)',opacity:0,filter:'blur(4px)'},{transform:'translateX(0)',opacity:1,filter:'blur(0)'}],{duration:850+ex,delay:Math.min(i,6)*120,easing:E,fill:'backwards'})));
+  }catch(e){}
 }
 function refresh(){
   treset();cur=plan();
@@ -732,7 +955,7 @@ function crearNumeroRodante(el,inicial,n,dec){
 // Tarjeta con regla. Trabaja internamente en DÉCIMAS enteras (sin errores de coma flotante);
 // hacia afuera entrega y recibe valores decimales (15.3).
 function crearTarjetaRegla({contenedor,etiqueta,etiquetaAria,min,max,inicial,prefijo,unidad,onChange,conRecomendado,onRecomendado}){
-  const MIN=Math.round(min*10),MAX=Math.round(max*10),INI=Math.round(inicial*10);
+  let MIN=Math.round(min*10);const MAX=Math.round(max*10),INI=Math.round(inicial*10);
   const SEP=7,SIGMA=5,ESCALA_MAX=0.7,K_SNAP=170,C_SNAP=24,UMBRAL_V=4,VMAX=160;
   const fm=t=>fmt((t/10).toFixed(1));
   const tarjeta=document.createElement('section');
@@ -897,6 +1120,7 @@ function crearTarjetaRegla({contenedor,etiqueta,etiquetaAria,min,max,inicial,pre
   return{
     obtenerValor:()=>valor===null?null:valor/10,
     setValor,
+    setMin(m){MIN=Math.round(m*10);regla.setAttribute('aria-valuemin',MIN/10)},
     redibujar:redibujarTema,
     visible:()=>!tarjeta.hidden,
     setVisible:b=>{tarjeta.hidden=!b},
@@ -909,24 +1133,26 @@ function crearTarjetaRegla({contenedor,etiqueta,etiquetaAria,min,max,inicial,pre
 
 /* ---------- eventos ---------- */
 function applyRatio(v){
-  v=clamp(d1(v),10,20);
+  v=clamp(d1(v),rmin(),20);
   if(Math.round(v*10)===Math.round(cur.rec*10))delete S.rx[rkey()];else S.rx[rkey()]=v;
   ratioCard.setValor(v,true);refresh();
 }
-document.addEventListener('change',e=>{if(e.target.id==='recipe'){S.recipe=e.target.value;render('#recipe')}});
+document.addEventListener('change',e=>{if(e.target.id==='recipe'){const rc=RECIPES.find(r=>r.id===e.target.value&&r.m===S.method);if(rc)S.recipeBy[S.method]=rc.id;transView(1,'#recipe')}else if(e.target.id==='grind'){S.advGrindBy[S.method]=e.target.value==='auto'||IG.includes(e.target.value)?e.target.value:'auto';render('#grind')}});
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act,v=b.dataset.v;
-  if(a==='tab'){S.tab=v;render()}
-  else if(a==='tema')setTema(v);
+  if(a==='tab'){const O=['simple','inter','adv'],d=O.indexOf(v)-O.indexOf(S.tab);if(!d)return;const ex=Math.abs(d)>1?500:0;$('#tabs').style.setProperty('--tabs-dur',(250+ex)+'ms');S.tab=v;transView(d>0?1:-1,null,ex)}
+  else if(a==='metodo'){cortina('#e2f04a',()=>{S.method=MET.includes(v)?v:null;S.adv.step=0;S.adv.done=false;render(S.method?null:'#msel-t');window.scrollTo(0,0)})}
+  else if(a==='tema')cambiarTema(v==='toggle'?(oscuro()?'light':'dark'):v);
   else if(a==='probar'){
     const k=v.split(':');
-    if(k[0]==='receta'){S.tab='inter';S.recipe=k[1];render()}
+    if(k[0]==='receta'){const rc=RECIPES.find(z=>z.id===k[1]&&z.m===S.method);if(rc){S.tab='inter';S.recipeBy[S.method]=rc.id;render()}}
     else if(k[0]==='ratio'&&cur&&cur.tune)applyRatio(k[1]==='-1'?cur.r-1:+k[1]);
   }
-  else if(a==='back'){S.adv.step=Math.max(0,S.adv.step-1);render('.wiz h2')}
+  else if(a==='back'){S.adv.step=Math.max(0,S.adv.step-1);transWiz(-1,'.wiz h2')}
   else if(a==='next')nextQ();
   else if(a==='edit'){S.adv.done=false;S.adv.step=0;render('.wiz h2')}
+  else if(a==='opt'){const t=$('#txt');if(t){t.value=v==='No sé'?'':v;S.adv.a[S.adv.step]=t.value;save();recog()}}
   else if(a==='tgo')tgo();
   else if(a==='trs'){treset();tick()}
 });
@@ -939,7 +1165,7 @@ $('#tabs').addEventListener('keydown',e=>{
 });
 
 const TKEY='calculadora-cafe-tema';
-function marcarTema(){const d=oscuro();document.querySelectorAll('[data-act=tema]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===(d?'dark':'light'))))}
+function marcarTema(){const d=oscuro(),b=document.getElementById('tbtn');if(b){b.dataset.d=d?'dark':'light';b.setAttribute('aria-label',d?'Cambiar a modo claro':'Cambiar a modo oscuro')}}
 function setTema(t){
   document.documentElement.dataset.theme=t;
   try{localStorage.setItem(TKEY,t)}catch(e){}
@@ -947,12 +1173,40 @@ function setTema(t){
   if(cafeCard)cafeCard.redibujar();if(ratioCard)ratioCard.redibujar();
 }
 mqOscuro.addEventListener('change',marcarTema);
+/* cortinas claro/oscuro */
+let temaAnimando=false;
+let pillListo=false;
+function pillTabs(snap){
+  const pl=document.getElementById('tpill2'),t=document.querySelector('#tabs [aria-selected=true]');if(!pl||!t)return;
+  if(!t.offsetWidth){pillListo=false;return}
+  const sn=snap||!pillListo;
+  if(sn)pl.style.transition='none';
+  pl.style.transform='translateX('+t.offsetLeft+'px)';pl.style.width=t.offsetWidth+'px';
+  if(sn){void pl.offsetWidth;pl.style.transition=''}
+  pillListo=true;
+}
+window.addEventListener('resize',()=>pillTabs(true));
+function cortina(col,medio){
+  if(temaAnimando)return;
+  if(mqReducido.matches||!document.documentElement.animate){medio();return}
+  temaAnimando=true;
+  const D=750,E='cubic-bezier(.65,0,.35,1)',f=document.createElement('div');
+  f.setAttribute('aria-hidden','true');
+  f.style.cssText='position:fixed;inset:0;z-index:2147483647;pointer-events:none;transform-origin:left;transform:scaleX(0);background:'+col;
+  document.body.appendChild(f);
+  let fin=false;const fuera=()=>{if(fin)return;fin=true;f.remove();temaAnimando=false};
+  const run=(fr,o)=>{f.style.transformOrigin=o;return f.animate(fr,{duration:D,easing:E,fill:'both'}).finished};
+  run([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],'left').then(()=>{medio();return run([{transform:'scaleX(1)'},{transform:'scaleX(0)'}],'right')}).then(fuera,()=>fuera());
+}
+function cambiarTema(dest){
+  cortina('#e2f04a',()=>{setTema(dest);const b=document.getElementById('tbtn'),ic=b&&b.querySelector(dest==='dark'?'.sun':'.moon');if(ic&&ic.animate)ic.animate([{transform:'rotate(-90deg) scale(.6)'},{transform:'rotate(0) scale(1)'}],{duration:300,easing:'cubic-bezier(.2,.8,.2,1)'})});
+}
 try{const t=localStorage.getItem(TKEY);if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}
 load();
 heroNum=crearNumeroRodante($('#h-agua'),0,3);
 cafeCard=crearTarjetaRegla({contenedor:$('#tarjetas'),etiqueta:'Café',etiquetaAria:'Café en gramos',min:5,max:40,inicial:S.cafe,unidad:'g',
   onChange:v=>{S.cafe=d1(v);refresh()}});
-ratioCard=crearTarjetaRegla({contenedor:$('#tarjetas'),etiqueta:'Ratio',etiquetaAria:'Ratio de agua por gramo de café',min:10,max:20,inicial:16,prefijo:'1:',conRecomendado:true,
+ratioCard=crearTarjetaRegla({contenedor:$('#tarjetas'),etiqueta:'Ratio',etiquetaAria:'Ratio de agua por gramo de café',min:RMIN,max:20,inicial:16,prefijo:'1:',conRecomendado:true,
   onChange:v=>{if(!cur||!cur.tune)return;if(Math.round(v*10)===Math.round(cur.rec*10))delete S.rx[rkey()];else S.rx[rkey()]=d1(v);refresh()},
   onRecomendado:()=>{if(!cur||!cur.tune)return;delete S.rx[rkey()];ratioCard.setValor(cur.rec,true);refresh()}});
 render();
